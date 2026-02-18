@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:foodyore/Welcome/Splash_Widget.dart';
 import 'package:foodyore/utils/Colors/AppColors.dart';
+import 'package:foodyore/utils/shared_preference_util.dart';
 import 'package:get/get.dart';
+import 'package:foodyore/utils/helpers/get_di.dart' as di;
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await di.init();
+   await SharedPreferenceUtil.getInstance();
   runApp(const MyApp());
 }
 

@@ -85,3 +85,10 @@ Future<void> openTerms({required String url}) async {
     throw 'Could not launch $url';
   }
 }
+
+
+String isSeenBoarding = 'isSeenBoarding';
+String isLoginKey = 'isLoginKey';
+String loginDataKey = 'loginDataKey';
+String languageKey = 'applangauge';
+String tokenKey = 'token';

@@ -23,6 +23,10 @@ dependencies:
   pinput: ^6.0.1
   intl: ^0.20.2
   image_picker: ^1.2.1
+  http: ^1.6.0
+  shared_preferences: ^2.5.4
+  fluttertoast: ^9.0.0
+  flutter_screenutil: ^5.9.3
 
 dev_dependencies:
   flutter_launcher_icons: "^0.14.4"
