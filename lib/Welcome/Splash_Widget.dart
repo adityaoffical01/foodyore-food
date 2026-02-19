@@ -1,6 +1,9 @@
 // ignore_for_file: deprecated_member_use
 
+import 'package:foodyore/Screens/Home/Home_Screen.dart';
 import 'package:foodyore/Welcome/Introduction_widget.dart';
+import 'package:foodyore/services/app_config.dart';
+import 'package:foodyore/services/auth.dart';
 import 'package:foodyore/utils/Colors/AppColors.dart';
 import 'package:flutter/material.dart';
 
@@ -25,12 +28,20 @@ class _SplashScreenState extends State<SplashScreen>
     );
     _animation = CurvedAnimation(parent: _controller, curve: Curves.easeIn);
     _controller.forward();
+    AuthToken = getAuthToken();
     _controller.addStatusListener((status) {
       if (status == AnimationStatus.completed) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const OnboardingScreen()),
-        );
+        AuthToken.isEmpty
+            ? Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const OnboardingScreen(),
+                ),
+              )
+            : Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => HomeScreen()),
+              );
       }
     });
   }

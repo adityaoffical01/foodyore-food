@@ -69,8 +69,9 @@ class CustomButton extends StatelessWidget {
               ? Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    const CustomLoder(size: 20),
+                    const CustomLoder(size: 16),
                     const SizedBox(width: 15),
                     Text(
                       'Please Wait..',

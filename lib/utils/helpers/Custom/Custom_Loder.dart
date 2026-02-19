@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 class CustomLoder extends StatefulWidget {
   final Color? color;
   final double? size;
-  const CustomLoder({super.key, this.color = AppColors.white, this.size = 30});
+  const CustomLoder({super.key, this.color = AppColors.white, this.size = 16});
 
   @override
   State<CustomLoder> createState() => _CustomLoderState();
@@ -14,7 +14,9 @@ class CustomLoder extends StatefulWidget {
 class _CustomLoderState extends State<CustomLoder> {
   @override
   Widget build(BuildContext context) {
-    return Center(
+    return SizedBox(
+      height: widget.size,
+      width: widget.size,
       child: CircularProgressIndicator(
         strokeWidth: 1.0,
         backgroundColor: widget.color!.withOpacity(0.2),

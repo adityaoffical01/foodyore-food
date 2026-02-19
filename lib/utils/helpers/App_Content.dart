@@ -64,7 +64,7 @@ void showCustomSnackBar({
               message,
               style: const TextStyle(
                 color: AppColors.white,
-                fontWeight: FontWeight.w500,
+                fontWeight: FontWeight.w600,
                 fontSize: AppSizes.small,
                 fontFamily: AppFonts.regular,
               ),
@@ -85,7 +85,6 @@ Future<void> openTerms({required String url}) async {
     throw 'Could not launch $url';
   }
 }
-
 
 String isSeenBoarding = 'isSeenBoarding';
 String isLoginKey = 'isLoginKey';

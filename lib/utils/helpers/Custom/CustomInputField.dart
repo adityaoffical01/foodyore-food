@@ -17,6 +17,7 @@ class CustomInputFieldTheme extends StatefulWidget {
   final String? validationMessage;
   final bool isRequired;
   final double? horizontalPadding;
+  final bool obscureText;
 
   const CustomInputFieldTheme({
     Key? key,
@@ -35,8 +36,9 @@ class CustomInputFieldTheme extends StatefulWidget {
     this.readOnly = false,
     this.maximumLines = 1,
     this.validationMessage = 'This field is required',
-    this.isRequired = true,
+    this.isRequired = false,
     this.horizontalPadding = 20.0,
+    this.obscureText = false,
   }) : super(key: key);
 
   @override
@@ -44,6 +46,14 @@ class CustomInputFieldTheme extends StatefulWidget {
 }
 
 class _CustomInputFieldThemeState extends State<CustomInputFieldTheme> {
+  late bool _obscureText;
+
+  @override
+  void initState() {
+    super.initState();
+    _obscureText = widget.obscureText;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -51,16 +61,30 @@ class _CustomInputFieldThemeState extends State<CustomInputFieldTheme> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          /// 🔹 Title + Required Indicator
           Padding(
             padding: const EdgeInsets.only(left: 8.0, bottom: 4),
-            child: Text(widget.title, style: widget.inputTextStyle),
+            child: Row(
+              children: [
+                Text(widget.title, style: widget.inputTextStyle),
+                if (widget.isRequired)
+                  const Text(
+                    " *",
+                    style: TextStyle(color: Colors.red, fontSize: 14),
+                  ),
+              ],
+            ),
           ),
+
+          /// 🔹 Text Field
           TextFormField(
             cursorColor: widget.cursorColor,
             controller: widget.controller,
             keyboardType: widget.inputType,
             readOnly: widget.readOnly!,
-            maxLines: widget.maximumLines,
+            maxLines: widget.obscureText ? 1 : widget.maximumLines,
+            obscureText: _obscureText,
+
             validator: (value) {
               if (widget.isRequired) {
                 if (value == null || value.trim().isEmpty) {
@@ -69,6 +93,7 @@ class _CustomInputFieldThemeState extends State<CustomInputFieldTheme> {
               }
               return null;
             },
+
             decoration: InputDecoration(
               hintText: widget.hintText,
               hintStyle: TextStyle(
@@ -84,6 +109,21 @@ class _CustomInputFieldThemeState extends State<CustomInputFieldTheme> {
                 vertical: 10,
                 horizontal: 12,
               ),
+
+              /// 🔹 Eye Button ONLY if obscureText true
+              suffixIcon: widget.obscureText
+                  ? IconButton(
+                      icon: Icon(
+                        _obscureText ? Icons.visibility_off : Icons.visibility,
+                        color: Colors.grey,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          _obscureText = !_obscureText;
+                        });
+                      },
+                    )
+                  : null,
 
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),

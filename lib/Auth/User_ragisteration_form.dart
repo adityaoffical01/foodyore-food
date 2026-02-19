@@ -15,9 +15,13 @@ import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 
 class UserRagisterationWidget extends StatefulWidget {
+  final String? phoneNumber;
   final bool? isFromProfile;
-  const UserRagisterationWidget({Key? key, this.isFromProfile = false})
-    : super(key: key);
+  const UserRagisterationWidget({
+    Key? key,
+    this.isFromProfile = false,
+    this.phoneNumber,
+  }) : super(key: key);
 
   @override
   State<UserRagisterationWidget> createState() =>
@@ -27,11 +31,12 @@ class UserRagisterationWidget extends StatefulWidget {
 class _UserRagisterationWidgetState extends State<UserRagisterationWidget> {
   final TextEditingController firstNameCtrl = TextEditingController();
   final TextEditingController lastNameCtrl = TextEditingController();
-  final TextEditingController phoneCtrl = TextEditingController(
-    text: '+91 234 567 8901',
-  );
+  final TextEditingController phoneCtrl = TextEditingController();
   final TextEditingController emailCtrl = TextEditingController();
   final TextEditingController dobCtrl = TextEditingController();
+  final TextEditingController addressCtrl = TextEditingController();
+  final TextEditingController genderCtrl = TextEditingController();
+  final TextEditingController passCtrl = TextEditingController();
 
   String? selectedGender;
 
@@ -64,6 +69,15 @@ class _UserRagisterationWidgetState extends State<UserRagisterationWidget> {
       setState(() {
         selectedImage = File(image.path);
       });
+    }
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    if (widget.phoneNumber != null) {
+      phoneCtrl.text = widget.phoneNumber!;
     }
   }
 
@@ -168,6 +182,7 @@ class _UserRagisterationWidgetState extends State<UserRagisterationWidget> {
                           controller: firstNameCtrl,
                           title: 'First Name',
                           hintText: 'Enter First Name',
+                          isRequired: true,
                         ),
                       ),
                       const SizedBox(width: 10),
@@ -177,6 +192,7 @@ class _UserRagisterationWidgetState extends State<UserRagisterationWidget> {
                           controller: lastNameCtrl,
                           title: 'Last Name',
                           hintText: 'Enter Last Name',
+                          isRequired: true,
                         ),
                       ),
                     ],
@@ -197,6 +213,7 @@ class _UserRagisterationWidgetState extends State<UserRagisterationWidget> {
                   controller: emailCtrl,
                   title: 'Email Address',
                   hintText: 'Enter email address',
+                  isRequired: true,
                 ),
 
                 const SizedBox(height: 10),
@@ -296,10 +313,18 @@ class _UserRagisterationWidgetState extends State<UserRagisterationWidget> {
 
                 const SizedBox(height: 10),
                 CustomInputFieldTheme(
-                  controller: emailCtrl,
+                  controller: addressCtrl,
                   title: 'Address',
                   hintText: 'Enter address',
                   maximumLines: 3,
+                ),
+                const SizedBox(height: 10),
+                CustomInputFieldTheme(
+                  controller: passCtrl,
+                  title: 'Password',
+                  hintText: 'Enter email password',
+                  obscureText: true,
+                  isRequired: true,
                 ),
                 const SizedBox(height: 100),
               ],

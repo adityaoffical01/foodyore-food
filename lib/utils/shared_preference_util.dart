@@ -30,7 +30,7 @@ class SharedPreferenceUtil {
   // put object
   static Future<bool>? putObject(String key, Object value) {
     if (_prefs == null) return null;
-    return _prefs!.setString(key,  json.encode(value));
+    return _prefs!.setString(key, json.encode(value));
   }
 
   // get obj
@@ -56,7 +56,11 @@ class SharedPreferenceUtil {
   }
 
   // get obj list
-  static List<T> getObjList<T>(String key, T f(Map v), {List<T> defValue = const []}) {
+  static List<T> getObjList<T>(
+    String key,
+    T f(Map v), {
+    List<T> defValue = const [],
+  }) {
     List<Map>? dataList = getObjectList(key);
     List<T>? list = dataList?.map((value) {
       return f(value);
@@ -101,7 +105,7 @@ class SharedPreferenceUtil {
   // put bool
   static Future<bool>? putBool(String key, bool value) {
     if (_prefs == null) return null;
-        print("pref put =====================$_prefs");
+    print("pref put =====================$_prefs");
     return _prefs!.setBool(key, value);
   }
 
@@ -130,7 +134,10 @@ class SharedPreferenceUtil {
   }
 
   // get string list
-  static List<String> getStringList(String key, {List<String> defValue = const []}) {
+  static List<String> getStringList(
+    String key, {
+    List<String> defValue = const [],
+  }) {
     if (_prefs == null) return defValue;
     return _prefs!.getStringList(key) ?? defValue;
   }
