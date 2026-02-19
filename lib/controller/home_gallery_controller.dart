@@ -5,13 +5,13 @@ import 'package:flutter/material.dart';
 import 'package:foodyore/data/response/api_response.dart';
 import 'package:foodyore/data/response/api_status.dart';
 import 'package:foodyore/model/home_gallery_model.dart';
-import 'package:foodyore/repository/api_repository.dart';
+import 'package:foodyore/repository/home_gallery_repo.dart';
 import 'package:foodyore/res/app_urls.dart';
 import 'package:foodyore/utils/app_utils.dart';
 import 'package:get/get.dart';
 
 class HomeGalleryController extends GetxController {
-  final _api = ApiRepository();
+  final _api = HomeGalleryRepo();
   final rxRequestStatus = Status.LOADING.obs;
   RxBool isLoading = false.obs;
   Rx<ApiResponse<HomeGalleryModel>> homdeGalleryData =

@@ -3,10 +3,10 @@ class HomeGalleryModel {
   bool? success;
   String? code;
   String? message;
-  List<Data>? data;
+  List<GalleryDataList>? galleryDataList;
   int? total;
 
-  HomeGalleryModel({this.success, this.code, this.message, this.data, this.total});
+  HomeGalleryModel({this.success, this.code, this.message, this.galleryDataList, this.total});
 
   HomeGalleryModel.fromJson(Map<String, dynamic> json) {
     if(json["success"] is bool) {
@@ -19,7 +19,7 @@ class HomeGalleryModel {
       message = json["message"];
     }
     if(json["data"] is List) {
-      data = json["data"] == null ? null : (json["data"] as List).map((e) => Data.fromJson(e)).toList();
+      galleryDataList = json["data"] == null ? null : (json["data"] as List).map((e) => GalleryDataList.fromJson(e)).toList();
     }
     if(json["total"] is int) {
       total = json["total"];
@@ -35,15 +35,15 @@ class HomeGalleryModel {
     _data["success"] = success;
     _data["code"] = code;
     _data["message"] = message;
-    if(data != null) {
-      _data["data"] = data?.map((e) => e.toJson()).toList();
+    if(galleryDataList != null) {
+      _data["data"] = galleryDataList?.map((e) => e.toJson()).toList();
     }
     _data["total"] = total;
     return _data;
   }
 }
 
-class Data {
+class GalleryDataList {
   String? tableId;
   String? title;
   String? fileName;
@@ -52,9 +52,9 @@ class Data {
   dynamic uploadedBy;
   String? pageUrl;
 
-  Data({this.tableId, this.title, this.fileName, this.filePath, this.uploadedDate, this.uploadedBy, this.pageUrl});
+  GalleryDataList({this.tableId, this.title, this.fileName, this.filePath, this.uploadedDate, this.uploadedBy, this.pageUrl});
 
-  Data.fromJson(Map<String, dynamic> json) {
+  GalleryDataList.fromJson(Map<String, dynamic> json) {
     if(json["TableId"] is String) {
       tableId = json["TableId"];
     }
@@ -76,8 +76,8 @@ class Data {
     }
   }
 
-  static List<Data> fromList(List<Map<String, dynamic>> list) {
-    return list.map(Data.fromJson).toList();
+  static List<GalleryDataList> fromList(List<Map<String, dynamic>> list) {
+    return list.map(GalleryDataList.fromJson).toList();
   }
 
   Map<String, dynamic> toJson() {

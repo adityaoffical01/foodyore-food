@@ -11,9 +11,12 @@ import 'package:foodyore/Screens/Widget/home/food_memory_section.dart';
 import 'package:foodyore/Screens/Widget/home/footer_section.dart';
 import 'package:foodyore/Screens/Widget/home/hero_section.dart';
 import 'package:foodyore/Screens/Widget/home/intro_section.dart';
+import 'package:foodyore/controller/home_gallery_controller.dart';
 import 'package:foodyore/utils/Colors/AppColors.dart';
 import 'package:foodyore/utils/helpers/App_Content.dart';
 import 'package:foodyore/utils/styles/Text_Styles.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
 
 class HomeScreen extends StatefulWidget {
   HomeScreen({super.key});
@@ -24,8 +27,16 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final ScrollController _scrollController = ScrollController();
+    final HomeGalleryController galleryController =
+      Get.put(HomeGalleryController());
 
   final GlobalKey _experienceKey = GlobalKey();
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    galleryController.fetchGalleryData(context);
+  }
 
   void _scrollToExperience() {
     final context = _experienceKey.currentContext;

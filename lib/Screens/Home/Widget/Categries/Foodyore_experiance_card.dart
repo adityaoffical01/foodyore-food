@@ -4,7 +4,9 @@ import 'package:foodyore/utils/helpers/App_Content.dart';
 import 'package:foodyore/utils/styles/Text_Styles.dart';
 
 class FoodyoreExperianceCard extends StatelessWidget {
-  const FoodyoreExperianceCard({Key? key}) : super(key: key);
+  final String imgUrls;
+  final String tittle;
+  const FoodyoreExperianceCard({Key? key, required this.imgUrls, required this.tittle}) : super(key: key);
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -51,21 +53,21 @@ class FoodyoreExperianceCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Farmlands',
+                      tittle,
                       style: AppTextStyles.bodyLarge.copyWith(
                         color: AppColors.white,
                         fontWeight: FontWeight.bold,
                         fontFamily: AppFonts.regular,
                       ),
                     ),
-                    Text(
-                      'Farm-to-table meals prepared where the ingredients are grown.',
-                      style: AppTextStyles.caption.copyWith(
-                        color: AppColors.white,
-                        fontWeight: FontWeight.bold,
-                        fontFamily: AppFonts.regular,
-                      ),
-                    ),
+                    // Text(
+                    //   'Farm-to-table meals prepared where the ingredients are grown.',
+                    //   style: AppTextStyles.caption.copyWith(
+                    //     color: AppColors.white,
+                    //     fontWeight: FontWeight.bold,
+                    //     fontFamily: AppFonts.regular,
+                    //   ),
+                    // ),
                   ],
                 ),
               ),

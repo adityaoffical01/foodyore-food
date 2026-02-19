@@ -41,7 +41,7 @@ class AllExperiancesWidget extends StatelessWidget {
                   itemBuilder: (context, index) {
                     return GestureDetector(
                       onTap: () => Get.to(CategryDetailsWidget()),
-                      child: FoodyoreExperianceCard(),
+                      child: FoodyoreExperianceCard( imgUrls: "", tittle: "",),
                     );
                   },
                 ),

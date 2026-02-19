@@ -4,16 +4,17 @@
 import 'dart:io';
 
 import 'package:foodyore/data/network/network_api_services.dart';
+import 'package:foodyore/model/home_gallery_model.dart';
 
 
 
-class ApiRepository {
+class HomeGalleryRepo {
   final _apiService  = NetworkApiServices() ;
 
-  Future<dynamic> getData( String  urls) async{
+  Future<HomeGalleryModel> getData( String  urls) async{
     dynamic response = await _apiService.getApi( 
      urls);
-    return  response;
+    return  HomeGalleryModel.fromJson(response);
   }
   Future<dynamic> postData( String urls, var data) async{
     dynamic response = await _apiService.postApi( data,
