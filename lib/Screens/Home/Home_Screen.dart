@@ -2,12 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:foodyore/Auth/User_ragisteration_form.dart';
 import 'package:foodyore/Screens/Home/Drawer/drawer.dart';
-import 'package:foodyore/Screens/Home/Widget/Categries/All_experiances_widget.dart';
-import 'package:foodyore/Screens/Home/Widget/Categries/Foodyore_experiance_card.dart';
-import 'package:foodyore/Screens/Home/Widget/Categries/Widget/Categry_details_widget.dart';
-import 'package:foodyore/Screens/Search/search_screen.dart';
 import 'package:foodyore/Screens/Widget/home/bottom_content.dart';
 import 'package:foodyore/Screens/Widget/home/bottom_host_section.dart';
 import 'package:foodyore/Screens/Widget/home/bottom_image.dart';
@@ -16,12 +11,9 @@ import 'package:foodyore/Screens/Widget/home/food_memory_section.dart';
 import 'package:foodyore/Screens/Widget/home/footer_section.dart';
 import 'package:foodyore/Screens/Widget/home/hero_section.dart';
 import 'package:foodyore/Screens/Widget/home/intro_section.dart';
-import 'package:foodyore/Screens/Widget/home/primary_button.dart';
 import 'package:foodyore/utils/Colors/AppColors.dart';
 import 'package:foodyore/utils/helpers/App_Content.dart';
 import 'package:foodyore/utils/styles/Text_Styles.dart';
-import 'package:get/get.dart';
-import 'package:iconsax_flutter/iconsax_flutter.dart';
 
 class HomeScreen extends StatefulWidget {
   HomeScreen({super.key});
