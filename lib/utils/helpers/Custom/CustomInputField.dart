@@ -82,6 +82,9 @@ class _CustomInputFieldThemeState extends State<CustomInputFieldTheme> {
             controller: widget.controller,
             keyboardType: widget.inputType,
             readOnly: widget.readOnly!,
+            showCursor: !widget.readOnly!,
+            enableInteractiveSelection: !widget.readOnly!,
+            canRequestFocus: !widget.readOnly!,
             maxLines: widget.obscureText ? 1 : widget.maximumLines,
             obscureText: _obscureText,
 
@@ -160,6 +163,20 @@ class _CustomInputFieldThemeState extends State<CustomInputFieldTheme> {
               ),
             ),
           ),
+
+          if (widget.readOnly == true)
+            Padding(
+              padding: EdgeInsets.only(top: 2, left: 8),
+              child: Text(
+                "You cannot update ${widget.title}.",
+                style: TextStyle(
+                  color: Colors.red,
+                  fontSize: 10,
+                  fontWeight: FontWeight.w500,
+                  fontFamily: AppFonts.regular,
+                ),
+              ),
+            ),
         ],
       ),
     );

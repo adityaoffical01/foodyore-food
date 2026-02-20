@@ -11,12 +11,12 @@ import 'package:foodyore/Screens/Widget/home/food_memory_section.dart';
 import 'package:foodyore/Screens/Widget/home/footer_section.dart';
 import 'package:foodyore/Screens/Widget/home/hero_section.dart';
 import 'package:foodyore/Screens/Widget/home/intro_section.dart';
+import 'package:foodyore/controller/category_controller.dart';
 import 'package:foodyore/controller/home_gallery_controller.dart';
 import 'package:foodyore/utils/Colors/AppColors.dart';
 import 'package:foodyore/utils/helpers/App_Content.dart';
 import 'package:foodyore/utils/styles/Text_Styles.dart';
 import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
 
 class HomeScreen extends StatefulWidget {
   HomeScreen({super.key});
@@ -27,15 +27,13 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final ScrollController _scrollController = ScrollController();
-    final HomeGalleryController galleryController =
-      Get.put(HomeGalleryController());
+  final CategoryController _catController = Get.put(CategoryController());
 
   final GlobalKey _experienceKey = GlobalKey();
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
-    galleryController.fetchGalleryData(context);
+    _catController.fetchCategories(context);
   }
 
   void _scrollToExperience() {
@@ -61,47 +59,50 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       backgroundColor: AppColors.white,
       drawer: buildDrawer(),
-      body: SingleChildScrollView(
-        controller: _scrollController,
-        physics: const AlwaysScrollableScrollPhysics(),
-        child: Column(
-          children: [
-            HeroSection(),
-            IntroSection(),
-            const SizedBox(height: 16),
-            ExperienceList(key: _experienceKey),
-            const SizedBox(height: 10),
-            BottomImage(),
-            BottomContent(onExploreTap: _scrollToExperience),
-            BecomeHostSection(),
-            FoodMemorySection(),
-            FooterSection(),
-            const SizedBox(height: 20),
-            Text.rich(
-              TextSpan(
-                children: [
-                  TextSpan(
-                    text: '©  Foodyore',
-                    style: AppTextStyles.bodySmall.copyWith(
-                      fontWeight: FontWeight.bold,
-                      fontFamily: AppFonts.regular,
-                      color: AppColors.black,
+      body: RefreshIndicator(
+        onRefresh: () async => _catController.fetchCategories(context),
+        child: SingleChildScrollView(
+          controller: _scrollController,
+          physics: const AlwaysScrollableScrollPhysics(),
+          child: Column(
+            children: [
+                 HeroSection(onExploreTap: _scrollToExperience),
+              IntroSection(),
+              const SizedBox(height: 16),
+              ExperienceList(key: _experienceKey),
+              const SizedBox(height: 10),
+              BottomImage(),
+              BottomContent(onExploreTap: _scrollToExperience),
+              BecomeHostSection(),
+              FoodMemorySection(),
+              FooterSection(),
+              const SizedBox(height: 20),
+              Text.rich(
+                TextSpan(
+                  children: [
+                    TextSpan(
+                      text: '©  Foodyore',
+                      style: AppTextStyles.bodySmall.copyWith(
+                        fontWeight: FontWeight.bold,
+                        fontFamily: AppFonts.regular,
+                        color: AppColors.black,
+                      ),
                     ),
-                  ),
-                  TextSpan(
-                    text: '  All rights reserved.',
-                    style: AppTextStyles.bodySmall.copyWith(
-                      fontWeight: FontWeight.w500,
-                      fontFamily: AppFonts.regular,
-                      color: AppColors.black,
+                    TextSpan(
+                      text: '  All rights reserved.',
+                      style: AppTextStyles.bodySmall.copyWith(
+                        fontWeight: FontWeight.w500,
+                        fontFamily: AppFonts.regular,
+                        color: AppColors.black,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
 
-            const SizedBox(height: 20),
-          ],
+              const SizedBox(height: 20),
+            ],
+          ),
         ),
       ),
     );

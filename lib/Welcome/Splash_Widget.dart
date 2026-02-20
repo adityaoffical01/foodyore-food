@@ -28,10 +28,10 @@ class _SplashScreenState extends State<SplashScreen>
     );
     _animation = CurvedAnimation(parent: _controller, curve: Curves.easeIn);
     _controller.forward();
-    AuthToken = getAuthToken();
+    authToken = getAuthToken();
     _controller.addStatusListener((status) {
       if (status == AnimationStatus.completed) {
-        AuthToken.isEmpty
+        authToken.isEmpty
             ? Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(

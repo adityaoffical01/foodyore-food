@@ -3,17 +3,25 @@ import 'package:foodyore/services/app_config.dart' as auth_config;
 String AuthKey = 'ded0031e0f7923758ed2ff7a53b6ac8c';
 String AuthToken = '';
 setHeaders() {
+  AuthToken = auth_config.getAuthToken();
   print("==============================$AuthKey");
 
-  return {'X-API-Key': '$AuthKey'};
+  return {
+     'Authorization': 'Bearer $AuthToken',
+    'X-API-Key': '$AuthKey'};
 }
 
 setHeaders2() {
-  AuthKey = auth_config.getAuthToken();
+  AuthToken = auth_config.getAuthToken();
 
-  print("==============================1$AuthKey");
+  print("==============================$AuthKey");
 
-  return {'Content-Type': 'application/json', 'X-API-Key': '$AuthKey'};
+  return {
+    'accept': 'application/json',
+    'Content-Type': 'application/json',
+     'Authorization': 'Bearer $AuthToken',
+    'X-API-Key': '$AuthKey',
+  };
 }
 
 void pr(dynamic params, {int lineNumber = 1}) {

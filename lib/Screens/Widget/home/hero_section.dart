@@ -4,6 +4,10 @@ import 'package:foodyore/Screens/Widget/home/hero_text.dart';
 import 'package:foodyore/Screens/Widget/home/top_bar.dart';
 
 class HeroSection extends StatelessWidget {
+    final VoidCallback onExploreTap;
+
+  const HeroSection({super.key, required this.onExploreTap});
+
   @override
   Widget build(BuildContext context) {
     return Stack(
@@ -15,7 +19,7 @@ class HeroSection extends StatelessWidget {
         ),
         GradientOverlay(context),
         TopBar(),
-        HeroText(),
+        HeroText(onExploreTap: onExploreTap,),
       ],
     );
   }

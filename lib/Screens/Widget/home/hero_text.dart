@@ -8,6 +8,9 @@ import 'package:foodyore/utils/styles/Text_Styles.dart';
 import 'package:get/get.dart';
 
 class HeroText extends StatelessWidget {
+  final VoidCallback onExploreTap;
+
+  const HeroText({super.key, required this.onExploreTap});
   @override
   Widget build(BuildContext context) {
     return Positioned(
@@ -34,9 +37,10 @@ class HeroText extends StatelessWidget {
           ),
           const SizedBox(height: 20),
           GestureDetector(
-            onTap: () {
-              Get.to(AllExperiancesWidget());
-            },
+            onTap: onExploreTap,
+            // onTap: () {
+            //   Get.to(AllExperiancesWidget());
+            // },
             child: PrimaryButton('EXPLORE OUR EXPERIENCES'),
           ),
           const SizedBox(height: 8),

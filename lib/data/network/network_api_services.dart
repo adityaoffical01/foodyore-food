@@ -132,14 +132,17 @@ class NetworkApiServices extends BaseApiServices {
   dynamic returnResponse(http.Response response) {
     switch (response.statusCode) {
       case 200:
-        dynamic responseJson = jsonDecode(response.body);
-        return responseJson;
+       return jsonDecode(response.body);
+      case 201:
+        return jsonDecode(response.body);
+
       case 400:
-        dynamic responseJson = jsonDecode(response.body);
-        return responseJson;
+        return jsonDecode(response.body);
+
       default:
         throw FetchDataException(
-          'Error accoured while communicating with server ${response.statusCode}',
+          'Error occurred while communicating with server '
+          'StatusCode: ${response.statusCode}',
         );
     }
   }
