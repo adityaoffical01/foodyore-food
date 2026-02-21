@@ -6,9 +6,7 @@ setHeaders() {
   AuthToken = auth_config.getAuthToken();
   print("==============================$AuthKey");
 
-  return {
-     'Authorization': 'Bearer $AuthToken',
-    'X-API-Key': '$AuthKey'};
+  return {'Authorization': 'Bearer $AuthToken', 'X-API-Key': '$AuthKey'};
 }
 
 setHeaders2() {
@@ -19,7 +17,7 @@ setHeaders2() {
   return {
     'accept': 'application/json',
     'Content-Type': 'application/json',
-     'Authorization': 'Bearer $AuthToken',
+    'Authorization': 'Bearer $AuthToken',
     'X-API-Key': '$AuthKey',
   };
 }

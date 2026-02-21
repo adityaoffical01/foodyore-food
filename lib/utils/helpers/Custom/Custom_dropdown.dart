@@ -16,12 +16,15 @@ Widget customDropdown({
       DropdownButtonFormField<String>(
         value: selectedValue,
         isExpanded: true,
+        isDense: true,
+        // itemHeight: 40,
         items: items
             .map((e) => DropdownMenuItem(value: e, child: Text(e)))
             .toList(),
         onChanged: onChanged,
         decoration: InputDecoration(
           filled: true,
+          isDense: true,
           fillColor: AppColors.white,
           contentPadding: const EdgeInsets.symmetric(
             horizontal: 12,

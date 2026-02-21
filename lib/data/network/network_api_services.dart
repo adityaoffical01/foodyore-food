@@ -84,6 +84,31 @@ class NetworkApiServices extends BaseApiServices {
   }
 
   @override
+  Future<dynamic> putApi(var data, String url) async {
+    if (kDebugMode) {
+      print(url);
+      print(data);
+      print(setHeaders());
+    }
+
+    dynamic responseJson;
+    try {
+      final response = await http
+          .put(Uri.parse(url), headers: setHeaders(), body: data)
+          .timeout(const Duration(seconds: 60));
+      responseJson = returnResponse(response);
+    } on SocketException {
+      throw InternetException('');
+    } on RequestTimeOut {
+      throw RequestTimeOut('');
+    }
+    if (kDebugMode) {
+      print("responseJson===$responseJson");
+    }
+    return responseJson;
+  }
+
+  @override
   Future<dynamic> postApiWithImage(
     File? image,
     var data,

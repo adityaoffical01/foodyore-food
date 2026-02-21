@@ -42,7 +42,7 @@ class ExperienceList extends StatelessWidget {
                   return Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 20),
                     child: GestureDetector(
-                      onTap: () => Get.to(const CategryDetailsWidget()),
+                      onTap: () => Get.to(CategryDetailsWidget(catItem: item)),
                       child: FoodyoreExperianceCard(
                         imgUrls: '',
                         tittle: item.categoryName ?? '',

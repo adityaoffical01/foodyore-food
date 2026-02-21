@@ -1,16 +1,33 @@
 import 'package:foodyore/Auth/User_ragisteration_form.dart';
 import 'package:foodyore/Screens/Home/Home_Screen.dart';
+import 'package:foodyore/model/profile_model.dart';
 import 'package:foodyore/services/app_config.dart';
 import 'package:get/get.dart';
 import 'package:foodyore/data/response/api_response.dart';
 import 'package:foodyore/repository/auth_repo.dart';
+import 'package:foodyore/utils/app_utils.dart';
 
 class AuthController extends GetxController {
   final AuthRepo _authRepo = AuthRepo();
 
   var loginResponse = ApiResponse<dynamic>.loading().obs;
+  var profileResponse = ApiResponse<UserProfileResponseModel>.loading().obs;
+  var userProfile = Rxn<UserData>();
+  var currentUserId = ''.obs;
   var isOtpSending = false.obs;
   var isOtpVerifying = false.obs;
+  var isProfileLoading = false.obs;
+  var isProfileUpdating = false.obs;
+
+  @override
+  void onInit() {
+    super.onInit();
+    final String savedUserId = getUserId();
+    if (savedUserId.trim().isNotEmpty) {
+      currentUserId.value = savedUserId;
+      getProfile(savedUserId);
+    }
+  }
 
   // 🔹 Get OTP
   Future<bool> initOTP(String phone) async {
@@ -62,7 +79,14 @@ class AuthController extends GetxController {
             ),
           );
         } else {
-          storeAuthToken(loginResponse.value.data['token'].toString());
+          final token = loginResponse.value.data['token']?.toString();
+          if (token != null && token.isNotEmpty && token != 'null') {
+            storeAuthToken(token);
+          }
+          final String id = loginResponse.value.data['user']['id'].toString();
+          storeUserId(id);
+          currentUserId.value = id;
+          await getProfile(id);
           Get.offAll(HomeScreen());
         }
 
@@ -120,7 +144,14 @@ class AuthController extends GetxController {
       );
       isOtpSending.value = false;
       if (response['success'] == true) {
-        storeAuthToken(response['token'].toString());
+        final token = response['token']?.toString();
+        if (token != null && token.isNotEmpty && token != 'null') {
+          storeAuthToken(token);
+        }
+        final String id = response['user']['id'].toString();
+        storeUserId(id);
+        currentUserId.value = id;
+        await getProfile(id);
         return true;
       } else {
         Get.snackbar("Registration Failed", response['message'] ?? "Error");
@@ -131,6 +162,104 @@ class AuthController extends GetxController {
       print("Registration Error: $e");
       Get.snackbar("Error", "Something went wrong");
       return false;
+    }
+  }
+
+  // for get profile
+  Future<bool> getProfile(String userId) async {
+    if (userId.trim().isEmpty) {
+      return false;
+    }
+    try {
+      isProfileLoading.value = true;
+      profileResponse.value = ApiResponse.loading();
+
+      final response = await _authRepo.getProfile(userId);
+      profileResponse.value = ApiResponse.completed(response);
+
+      if (response.success == true && response.data != null) {
+        userProfile.value = response.data;
+        return true;
+      }
+
+      final message = 'Unable to fetch profile';
+      profileResponse.value = ApiResponse.error(message);
+      AppUtils.instance.snackBar("Error", message, true);
+      return false;
+    } catch (e) {
+      final message = e.toString();
+      profileResponse.value = ApiResponse.error(message);
+      AppUtils.instance.snackBar("Error", message, true);
+      return false;
+    } finally {
+      isProfileLoading.value = false;
+    }
+  }
+
+  Future<bool> updateProfile({
+    required String userId,
+    required String name,
+    required String email,
+    String? gender,
+    String? alternateNumber,
+    String? alternateName,
+    String? occupation,
+    String? maritalStatus,
+    String? dateOfBirth,
+    String? address,
+    String? country,
+    String? state,
+    String? city,
+    String? phone,
+  }) async {
+    if (userId.trim().isEmpty) {
+      AppUtils.instance.snackBar("Error", "User id is missing", true);
+      return false;
+    }
+
+    try {
+      isProfileUpdating.value = true;
+      final response = await _authRepo.updateProfile(
+        userId: userId,
+        name: name,
+        email: email,
+        gender: gender,
+        alternateNumber: alternateNumber,
+        alternateName: alternateName,
+        occupation: occupation,
+        maritalStatus: maritalStatus,
+        dateOfBirth: dateOfBirth == null || dateOfBirth.trim().isEmpty
+            ? ''
+            : AppUtils.instance.normalizeToYMD(dateOfBirth),
+        address: address,
+        country: country,
+        state: state,
+        city: city,
+        phone: phone,
+      );
+
+      if (response['success'] == true) {
+        AppUtils.instance.snackBar(
+          "Success",
+          response['message'] ?? "Profile updated successfully",
+          false,
+        );
+        await getProfile(userId);
+
+        return true;
+      }
+
+      AppUtils.instance.snackBar(
+        "Error",
+        response['message'] ?? "Profile update failed",
+        true,
+      );
+      return false;
+    } catch (e) {
+      AppUtils.instance.snackBar("Error", e.toString(), true);
+      return false;
+    } finally {
+      isProfileUpdating.value = false;
     }
   }
 }

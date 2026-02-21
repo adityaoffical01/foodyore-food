@@ -60,6 +60,33 @@ class AppUtils {
     return date;
   }
 
+  // Normalize mixed date inputs to yyyy-MM-dd for form fields / APIs.
+  String normalizeToYMD(String rawDate) {
+    final String cleanedDate = rawDate.trim().replaceAll(RegExp(r'\s+'), ' ');
+    if (cleanedDate.isEmpty) return '';
+
+    DateTime? parsedDate = DateTime.tryParse(cleanedDate);
+    if (parsedDate == null) {
+      final List<String> patterns = [
+        'MMM d yyyy hh:mma',
+        'MMM d yyyy h:mma',
+        'MMM d yyyy',
+        'dd-MM-yyyy',
+        'MM-dd-yyyy',
+      ];
+
+      for (final pattern in patterns) {
+        try {
+          parsedDate = DateFormat(pattern).parseLoose(cleanedDate);
+          break;
+        } catch (_) {}
+      }
+    }
+
+    if (parsedDate == null) return cleanedDate;
+    return DateFormat('yyyy-MM-dd').format(parsedDate);
+  }
+
   // String convertDateToMMMDDYYYYFormat({String? dateString}) {
   //   if (dateString == null || dateString.isEmpty) {
   //     return '';
@@ -83,7 +110,9 @@ class AppUtils {
     Get.snackbar(
       title,
       message,
-      backgroundColor: isError ? AppColors.red : AppColors.green,
+      backgroundColor: isError
+          ? AppColors.red
+          : const Color.fromARGB(255, 0, 141, 0),
 
       duration: const Duration(seconds: 3),
       titleText: Text(

@@ -168,7 +168,7 @@ class _CustomInputFieldThemeState extends State<CustomInputFieldTheme> {
             Padding(
               padding: EdgeInsets.only(top: 2, left: 8),
               child: Text(
-                "You cannot update ${widget.title}.",
+                "You can't change ${widget.title}.",
                 style: TextStyle(
                   color: Colors.red,
                   fontSize: 10,

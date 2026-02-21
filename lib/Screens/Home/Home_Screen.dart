@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:foodyore/Auth/Controller/Auth_Controller.dart';
 import 'package:foodyore/Screens/Home/Drawer/drawer.dart';
 import 'package:foodyore/Screens/Widget/home/bottom_content.dart';
 import 'package:foodyore/Screens/Widget/home/bottom_host_section.dart';
@@ -13,6 +14,7 @@ import 'package:foodyore/Screens/Widget/home/hero_section.dart';
 import 'package:foodyore/Screens/Widget/home/intro_section.dart';
 import 'package:foodyore/controller/category_controller.dart';
 import 'package:foodyore/controller/home_gallery_controller.dart';
+import 'package:foodyore/services/app_config.dart';
 import 'package:foodyore/utils/Colors/AppColors.dart';
 import 'package:foodyore/utils/helpers/App_Content.dart';
 import 'package:foodyore/utils/styles/Text_Styles.dart';
@@ -28,12 +30,14 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final ScrollController _scrollController = ScrollController();
   final CategoryController _catController = Get.put(CategoryController());
+  final AuthController _authController = Get.put(AuthController());
 
   final GlobalKey _experienceKey = GlobalKey();
   @override
   void initState() {
     super.initState();
     _catController.fetchCategories(context);
+    _authController.getProfile(userId);
   }
 
   void _scrollToExperience() {
@@ -48,7 +52,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final offset = viewport.getOffsetToReveal(renderObject, 0.0).offset;
 
     _scrollController.animateTo(
-      offset - 80, // little top padding
+      offset - 80,
       duration: const Duration(milliseconds: 700),
       curve: Curves.easeInOut,
     );
@@ -66,7 +70,7 @@ class _HomeScreenState extends State<HomeScreen> {
           physics: const AlwaysScrollableScrollPhysics(),
           child: Column(
             children: [
-                 HeroSection(onExploreTap: _scrollToExperience),
+              HeroSection(onExploreTap: _scrollToExperience),
               IntroSection(),
               const SizedBox(height: 16),
               ExperienceList(key: _experienceKey),

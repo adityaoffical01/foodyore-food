@@ -4,9 +4,12 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:foodyore/Auth/Controller/Auth_Controller.dart';
 import 'package:foodyore/Screens/Home/Home_Screen.dart';
+import 'package:foodyore/model/profile_model.dart';
+import 'package:foodyore/services/app_config.dart';
 import 'package:foodyore/utils/Colors/AppColors.dart';
 import 'package:foodyore/utils/app_utils.dart';
 import 'package:foodyore/utils/helpers/Custom/CustomInputField.dart';
+import 'package:foodyore/utils/helpers/Custom/Custom_Loder.dart';
 import 'package:foodyore/utils/helpers/Custom/Custom_butoons.dart';
 import 'package:foodyore/utils/helpers/Custom/Custom_dropdown.dart';
 import 'package:foodyore/utils/helpers/Custom/Custom_screen_background.dart';
@@ -36,6 +39,7 @@ class UserRagisterationWidget extends StatefulWidget {
 class _UserRagisterationWidgetState extends State<UserRagisterationWidget> {
   final AuthController _authController = Get.put(AuthController());
   final _formKey = GlobalKey<FormState>();
+  bool _isProfilePrefillLoading = false;
 
   // Controllers
   final firstNameCtrl = TextEditingController();
@@ -61,6 +65,9 @@ class _UserRagisterationWidgetState extends State<UserRagisterationWidget> {
     super.initState();
     if (widget.phoneNumber != null) {
       phoneCtrl.text = widget.phoneNumber!;
+    }
+    if (widget.isFromProfile == true) {
+      _loadProfileForEdit();
     }
   }
 
@@ -99,6 +106,66 @@ class _UserRagisterationWidgetState extends State<UserRagisterationWidget> {
     }
   }
 
+  Future<void> _loadProfileForEdit() async {
+    UserData? profile = _authController.userProfile.value;
+
+    if (profile == null) {
+      String id = _authController.currentUserId.value;
+      if (id.trim().isEmpty) {
+        id = getUserId();
+      }
+      if (id.trim().isNotEmpty) {
+        await _authController.getProfile(id);
+        profile = _authController.userProfile.value;
+      }
+    }
+
+    if (profile != null && mounted) {
+      _prefillForm(profile);
+    }
+  }
+
+  void _prefillForm(UserData profile) {
+    final String fullName = (profile.fullName ?? '').trim();
+    if (fullName.isNotEmpty) {
+      final List<String> parts = fullName.split(RegExp(r'\s+'));
+      firstNameCtrl.text = parts.first;
+      lastNameCtrl.text = parts.length > 1 ? parts.sublist(1).join(' ') : '';
+    }
+
+    if ((profile.mobileNumber ?? '').trim().isNotEmpty) {
+      phoneCtrl.text = profile.mobileNumber!.trim();
+    }
+    if ((profile.emailAddress ?? '').trim().isNotEmpty) {
+      emailCtrl.text = profile.emailAddress!.trim();
+    }
+    if ((profile.dateOfBirth ?? '').trim().isNotEmpty) {
+      dobCtrl.text = AppUtils.instance.normalizeToYMD(profile.dateOfBirth!);
+    }
+
+    selectedGender = _matchDropdownValue(profile.gender, genderList);
+    selectedOccupation = _matchDropdownValue(
+      profile.occupation,
+      occupationList,
+    );
+    selectedMaritalStatus = _matchDropdownValue(
+      profile.martialStats,
+      maritalStatusList,
+    );
+    setState(() {});
+  }
+
+  String? _matchDropdownValue(String? value, List<String> options) {
+    if (value == null || value.trim().isEmpty) return null;
+    final String normalized = value.trim().toLowerCase();
+    for (final option in options) {
+      if (option.toLowerCase() == normalized) {
+        return option;
+      }
+    }
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -122,34 +189,55 @@ class _UserRagisterationWidgetState extends State<UserRagisterationWidget> {
           : null,
       backgroundColor: AppColors.backgroundColor,
       body: SafeArea(
-        child: CustomBackground(
-          child: Form(
-            key: _formKey,
-            child: SingleChildScrollView(
-              child: Column(
-                children: [
-                  const SizedBox(height: 20),
-                  _profileImageSection(),
-                  const SizedBox(height: 20),
-                  _nameRow(),
-                  const SizedBox(height: 10),
-                  _phoneField(),
-                  const SizedBox(height: 10),
-                  _emailField(),
-                  const SizedBox(height: 10),
-                  _genderDobRow(),
-                  const SizedBox(height: 10),
-                  _occupationDropdown(),
-                  const SizedBox(height: 10),
-                  _maritalDropdown(),
-                  const SizedBox(height: 10),
-                  _passwordField(),
-                  const SizedBox(height: 20),
-                  _submitButton(),
-                ],
+        child: Stack(
+          children: [
+            CustomBackground(
+              child: Form(
+                key: _formKey,
+                child: RefreshIndicator(
+                  onRefresh: () async {
+                    if (widget.isFromProfile == true) {
+                      await _loadProfileForEdit();
+                    }
+                  },
+                  child: SingleChildScrollView(
+                    physics: AlwaysScrollableScrollPhysics(),
+                    child: Column(
+                      children: [
+                        const SizedBox(height: 20),
+                        _profileImageSection(),
+                        const SizedBox(height: 20),
+                        _nameRow(),
+                        const SizedBox(height: 10),
+                        _phoneField(),
+                        const SizedBox(height: 10),
+                        _emailField(),
+                        const SizedBox(height: 10),
+                        _genderDobRow(),
+                        const SizedBox(height: 10),
+                        _occupationDropdown(),
+                        const SizedBox(height: 10),
+                        _maritalDropdown(),
+                        if (widget.isFromProfile != true) ...[
+                          const SizedBox(height: 10),
+                          _passwordField(),
+                        ],
+                        const SizedBox(height: 20),
+                        _submitButton(),
+                      ],
+                    ),
+                  ),
+                ),
               ),
             ),
-          ),
+            if (_isProfilePrefillLoading)
+              const Positioned.fill(
+                child: ColoredBox(
+                  color: Color(0x33000000),
+                  child: CustomLoder(color: AppColors.primaryColor, size: 20),
+                ),
+              ),
+          ],
         ),
       ),
       // bottomSheet: _submitButton(),
@@ -220,7 +308,7 @@ class _UserRagisterationWidgetState extends State<UserRagisterationWidget> {
               controller: firstNameCtrl,
               title: 'First Name',
               hintText: 'Enter First Name',
-              isRequired: true,
+              isRequired: widget.isFromProfile == true ? false : true,
             ),
           ),
           const SizedBox(width: 10),
@@ -230,7 +318,7 @@ class _UserRagisterationWidgetState extends State<UserRagisterationWidget> {
               controller: lastNameCtrl,
               title: 'Last Name',
               hintText: 'Enter Last Name',
-              isRequired: true,
+              isRequired: widget.isFromProfile == true ? false : true,
             ),
           ),
         ],
@@ -252,7 +340,8 @@ class _UserRagisterationWidgetState extends State<UserRagisterationWidget> {
       controller: emailCtrl,
       title: 'Email Address',
       hintText: 'Enter email',
-      isRequired: true,
+      readOnly: widget.isFromProfile == true ? true : false,
+      isRequired: widget.isFromProfile == true ? false : true,
     );
   }
 
@@ -321,7 +410,7 @@ class _UserRagisterationWidgetState extends State<UserRagisterationWidget> {
       title: 'Password',
       hintText: 'Create password',
       obscureText: true,
-      isRequired: true,
+      isRequired: widget.isFromProfile == true ? false : true,
     );
   }
 
@@ -330,7 +419,11 @@ class _UserRagisterationWidgetState extends State<UserRagisterationWidget> {
       color: AppColors.backgroundColor,
       padding: const EdgeInsets.symmetric(horizontal: 20).copyWith(bottom: 20),
       child: Obx(
-        () => _authController.isOtpSending.value
+        () {
+          final bool isLoading = widget.isFromProfile == true
+              ? _authController.isProfileUpdating.value
+              : _authController.isOtpSending.value;
+          return isLoading
             ? CustomButton(
                 horizontal: 0,
                 width: 200.0,
@@ -342,11 +435,35 @@ class _UserRagisterationWidgetState extends State<UserRagisterationWidget> {
             : CustomButton(
                 horizontal: 0,
                 width: 200.0,
-                title: 'Submit',
+                title: widget.isFromProfile == true ? 'Update' : 'Submit',
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {
                     if (widget.isFromProfile == true) {
-                      Get.back();
+                      final String id = _authController.currentUserId.value
+                              .trim()
+                              .isNotEmpty
+                          ? _authController.currentUserId.value
+                          : getUserId();
+                      final String name =
+                          "${firstNameCtrl.text.trim()} ${lastNameCtrl.text.trim()}"
+                              .trim();
+
+                      _authController
+                          .updateProfile(
+                            userId: id,
+                            name: name,
+                            email: emailCtrl.text.trim(),
+                            gender: selectedGender?.toLowerCase(),
+                            dateOfBirth: dobCtrl.text.trim(),
+                            occupation: selectedOccupation?.toLowerCase(),
+                            maritalStatus: selectedMaritalStatus?.toLowerCase(),
+                            phone: phoneCtrl.text.trim(),
+                          )
+                          .then((isUpdated) {
+                            if (isUpdated == true) {
+                              Get.back();
+                            }
+                          });
                     } else {
                       if (firstNameCtrl.text.isEmpty ||
                           lastNameCtrl.text.isEmpty ||
@@ -385,7 +502,8 @@ class _UserRagisterationWidgetState extends State<UserRagisterationWidget> {
                   }
                 },
                 color: AppColors.primaryColor,
-              ),
+            );
+        },
       ),
     );
   }

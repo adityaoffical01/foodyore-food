@@ -6,8 +6,16 @@ class AppUrl {
   static const String initiate_otp = '$baseSlugUrl/auth/initiate-registration';
   static const String verify_otp = '$baseSlugUrl/auth/verify-registration-otp';
   static const String register_user = '$baseSlugUrl/auth/complete-registration';
-
+  static String login_user(String user_id) => '$baseSlugUrl/users/$user_id';
   // for home
   static const String homeGalleryUrls = '$baseSlugUrl/home/gallery';
+
+  // for products
   static const String categroryUrls = '$baseSlugUrl/products/categories';
+  static String subCategoryUrls(String categoryId, [String cursor = '']) {
+    final String base =
+        '$baseSlugUrl/products/categories/$categoryId/subcategories?limit=10';
+    if (cursor.trim().isEmpty) return base;
+    return '$base&cursor=$cursor';
+  }
 }

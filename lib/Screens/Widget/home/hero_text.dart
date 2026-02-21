@@ -1,11 +1,9 @@
 // Hero Text Widget
 import 'package:flutter/material.dart';
-import 'package:foodyore/Screens/Home/Widget/Categries/All_experiances_widget.dart';
 import 'package:foodyore/Screens/Widget/home/out_line_button.dart';
 import 'package:foodyore/Screens/Widget/home/primary_button.dart';
 import 'package:foodyore/utils/Colors/AppColors.dart';
 import 'package:foodyore/utils/styles/Text_Styles.dart';
-import 'package:get/get.dart';
 
 class HeroText extends StatelessWidget {
   final VoidCallback onExploreTap;
