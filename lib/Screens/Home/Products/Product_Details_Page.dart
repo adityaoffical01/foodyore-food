@@ -2,10 +2,16 @@
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:foodyore/Screens/Home/Menu/Menu_Item_Widget.dart';
-import 'package:foodyore/utils/helpers/App_Content.dart';
+import 'package:foodyore/controller/host_descriptions_controlller.dart';
+import 'package:foodyore/data/response/api_status.dart';
+import 'package:foodyore/model/amenities_list_model.dart';
 import 'package:get/get.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
+
+import 'package:foodyore/model/host_descripetions_model.dart';
+
+import 'package:foodyore/Screens/Home/Menu/Menu_Item_Widget.dart';
+import 'package:foodyore/utils/helpers/App_Content.dart';
 import 'package:foodyore/utils/Colors/AppColors.dart';
 import 'package:foodyore/utils/helpers/Custom/Custom_butoons.dart';
 import 'package:foodyore/utils/helpers/Custom/Custom_screen_background.dart';
@@ -13,7 +19,11 @@ import 'package:foodyore/utils/styles/Custom_circular_button.dart';
 import 'package:foodyore/utils/styles/Text_Styles.dart';
 
 class ProductDetailsPageWidget extends StatefulWidget {
-  const ProductDetailsPageWidget({Key? key}) : super(key: key);
+final String hostId;
+final String cattId;
+final String subCatId;
+final String locationId;
+  const ProductDetailsPageWidget({Key? key, required this.hostId, required this.cattId, required this.subCatId, required this.locationId}) : super(key: key);
 
   @override
   State<ProductDetailsPageWidget> createState() =>
@@ -24,23 +34,52 @@ class _ProductDetailsPageWidgetState extends State<ProductDetailsPageWidget> {
   final PageController _pageController = PageController();
   int _currentIndex = 0;
 
-  final List<String> images = [
-    'assets/images/formland.jpg',
-    'assets/images/formland.jpg',
-    'assets/images/formland.jpg',
-  ];
+  final HostDescriptionsControlller controller =
+      Get.put(HostDescriptionsControlller());
+
+  @override
+  void initState() {
+    super.initState();
+    controller.fetchHostData(context, widget.hostId); // 🔴 pass real hostId
+    controller.fetcAnimatesData(context, widget.cattId, widget.subCatId, widget.hostId, widget.locationId) ; // 🔴 pass real hostId
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.backgroundColor,
       body: CustomBackground(
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [_buildImageSlider(), _buildContentSection()],
-          ),
-        ),
+        child: Obx(() {
+          if (controller.rxRequestStatus.value == Status.LOADING) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          if (controller.rxRequestStatus.value == Status.ERROR) {
+            return Center(
+              child: Text(
+                controller.error.value,
+                style: AppTextStyles.bodySmall,
+              ),
+            );
+          }
+
+          final Data? data =
+              controller.hostDescripetionsModel.value.data?.data;
+
+          if (data == null) {
+            return const Center(child: Text("No data found"));
+          }
+
+          return SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildImageSlider(data),
+                _buildContentSection(data),
+              ],
+            ),
+          );
+        }),
       ),
       bottomSheet: Container(
         color: AppColors.backgroundColor,
@@ -51,7 +90,20 @@ class _ProductDetailsPageWidgetState extends State<ProductDetailsPageWidget> {
 
   /* ---------------------------- IMAGE SLIDER ---------------------------- */
 
-  Widget _buildImageSlider() {
+  Widget _buildImageSlider(Data data) {
+    // final images = [
+    //   data.hostDescription?.fileUpload1,
+    //   data.hostDescription?.fileUpload2,
+    //   data.hostDescription?.fileUpload3,
+    //   data.hostDescription?.fileUpload4,
+    // ].where((e) => e != null && e.isNotEmpty).toList();
+
+  final List<String> images = [
+    'assets/images/formland.jpg',
+    'assets/images/formland.jpg',
+    'assets/images/formland.jpg',
+  ].where((e) => e != null && e.isNotEmpty).toList();
+
     return Stack(
       children: [
         SizedBox(
@@ -60,11 +112,10 @@ class _ProductDetailsPageWidgetState extends State<ProductDetailsPageWidget> {
           child: PageView.builder(
             controller: _pageController,
             itemCount: images.length,
-            onPageChanged: (index) => setState(() {
-              _currentIndex = index;
-            }),
+            onPageChanged: (index) =>
+                setState(() => _currentIndex = index),
             itemBuilder: (_, index) => Image.asset(
-              images[index],
+              images[index]!,
               fit: BoxFit.cover,
               width: double.infinity,
             ),
@@ -128,48 +179,122 @@ class _ProductDetailsPageWidgetState extends State<ProductDetailsPageWidget> {
 
   /* ---------------------------- CONTENT ---------------------------- */
 
-  Widget _buildContentSection() {
+  Widget _buildContentSection(Data data) {
+    final host = data.hostDescription;
+    final location = data.location;
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildBreadcrumbs(),
+          _buildBreadcrumbs(data),
           const SizedBox(height: 8),
-          Text('ADITYA AAM KA BAAG', style: AppTextStyles.headingSmall),
+
+          Text(
+            host?.descriptionTitle ?? '',
+            style: AppTextStyles.headingSmall,
+          ),
           const SizedBox(height: 5),
 
           _sectionTitle('About the Experience'),
-          _paragraph(
-            "Hosted in a working mango orchard, Neeraj Aam Baagan offers a relaxed farm-based dining experience where meals are prepared using traditional methods and seasonal ingredients. Guests are welcomed into an open, green setting designed for slow conversations and shared tables.",
-          ),
-          const SizedBox(height: 8),
-          _paragraph(
-            "नीरज आम बागान तेहतना भगवंतपुर माल मलिहाबाद आपका स्वागत है हमारे यहां शुद्ध देसी खाना चूल्हे पर बनाया जाता है जिसमें चूल्हे पर बना देसी मुर्गा, चूल्हे पर बना मटर पनीर, चूल्हे पर ही बनी हुई सब्जियां, हाथ से बनी रोटियां और भी खाने में अनेक व्यंजन उपलब्ध है धन्यवाद...",
-          ),
+          _paragraph(host?.description ?? ''),
 
           const SizedBox(height: 10),
           _sectionTitle('Location'),
-          _buildMapSection(),
+          _buildMapSection(location),
 
-          const SizedBox(height: 12),
+          // const SizedBox(height: 60),
+             const SizedBox(height: 12),
           _sectionTitle('What to Expect'),
-          const SizedBox(height: 8),
-          _expectationCard(),
+          _expectationSection(),
           const SizedBox(height: 60),
         ],
       ),
     );
   }
+  Widget _expectationSection() {
+  return Obx(() {
+    if (controller.animatesListModel.value.status == Status.LOADING) {
+      return const SizedBox(
+        height: 100,
+        child: Center(child: CircularProgressIndicator()),
+      );
+    }
 
-  Widget _buildBreadcrumbs() {
+    final amenities =
+        controller.animatesListModel.value.data?.amenitiesData ?? [];
+
+    if (amenities.isEmpty) {
+      return const SizedBox(); // UI clean
+    }
+
+    return Wrap(
+      spacing: 12,
+      runSpacing: 12,
+      children: amenities.map((item) {
+        return _expectationCard(item);
+      }).toList(),
+    );
+  });
+}
+Widget _expectationCard(AmenitiesData item) {
+  return Stack(
+    children: [
+      ClipRRect(
+        borderRadius: BorderRadius.circular(20),
+        child: Image.network(
+          item.amenitieImage ?? '',
+          width: 160,
+          height: 100,
+          fit: BoxFit.cover,
+          errorBuilder: (_, __, ___) => Image.asset(
+            'assets/images/fire.jpg',
+            width: 160,
+            height: 100,
+            fit: BoxFit.cover,
+          ),
+        ),
+      ),
+      Positioned(
+        bottom: 6,
+        left: 15,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              item.amenitieType ?? '',
+              style: AppTextStyles.bodySmall.copyWith(
+                color: AppColors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Text(
+              '₹${item.price ?? 0} ${item.unit ?? ''}',
+              style: AppTextStyles.bodySmall.copyWith(
+                color: AppColors.white,
+              ),
+            ),
+          ],
+        ),
+      ),
+    ],
+  );
+}
+
+  Widget _buildBreadcrumbs(Data data) {
     return Row(
       children: [
-        _breadcrumbText('FARMLANDS'),
+        _breadcrumbText(data.location?.categoryName ?? ''),
         _dot(),
-        _breadcrumbText('ORCHARDS BY ADITYA SINGH'),
+        _breadcrumbText(data.location?.subCategoryName ?? ''),
         _dot(),
-        Expanded(child: _breadcrumbText('ADITYA AAM KA BAAG', bold: true)),
+        Expanded(
+          child: _breadcrumbText(
+            data.hostDescription?.descriptionTitle ?? '',
+            bold: true,
+          ),
+        ),
       ],
     );
   }
@@ -187,9 +312,9 @@ class _ProductDetailsPageWidgetState extends State<ProductDetailsPageWidget> {
   }
 
   Widget _dot() => const Padding(
-    padding: EdgeInsets.symmetric(horizontal: 4),
-    child: Icon(Icons.circle, size: 6),
-  );
+        padding: EdgeInsets.symmetric(horizontal: 4),
+        child: Icon(Icons.circle, size: 6),
+      );
 
   Widget _sectionTitle(String title) {
     return Text(
@@ -209,7 +334,7 @@ class _ProductDetailsPageWidgetState extends State<ProductDetailsPageWidget> {
     );
   }
 
-  Widget _buildMapSection() {
+  Widget _buildMapSection(Location? location) {
     return Column(
       children: [
         const SizedBox(height: 5),
@@ -224,15 +349,15 @@ class _ProductDetailsPageWidgetState extends State<ProductDetailsPageWidget> {
         ),
         const SizedBox(height: 8),
         Row(
-          spacing: 8,
           children: [
             Expanded(
               child: Text(
-                'Tethna Bhagwant Pur Chandrika Devi Road, Uttar Pradesh, Lucknow',
+                "${location?.address1 ?? ''}, "
+                "${location?.cityName ?? ''}, "
+                "${location?.stateName ?? ''}",
                 maxLines: 2,
                 style: AppTextStyles.bodySmall.copyWith(
                   color: AppColors.black,
-                  fontFamily: AppFonts.regular,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -258,42 +383,6 @@ class _ProductDetailsPageWidgetState extends State<ProductDetailsPageWidget> {
           fontWeight: FontWeight.bold,
         ),
       ),
-    );
-  }
-
-  Widget _expectationCard() {
-    return Stack(
-      children: [
-        ClipRRect(
-          borderRadius: BorderRadius.circular(20),
-          child: Image.asset(
-            'assets/images/fire.jpg',
-            width: 160,
-            height: 100,
-            fit: BoxFit.cover,
-          ),
-        ),
-        Positioned(
-          bottom: 6,
-          left: 15,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Fireplace',
-                style: AppTextStyles.bodySmall.copyWith(
-                  color: AppColors.white,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              Text(
-                '₹200 per hour',
-                style: AppTextStyles.bodySmall.copyWith(color: AppColors.white),
-              ),
-            ],
-          ),
-        ),
-      ],
     );
   }
 
@@ -325,6 +414,8 @@ class _ProductDetailsPageWidgetState extends State<ProductDetailsPageWidget> {
   }
 }
 
+/* ---------------------------- BOOKING SHEET (UNCHANGED) ---------------------------- */
+
 class _BookingBottomSheet extends StatefulWidget {
   @override
   State<_BookingBottomSheet> createState() => _BookingBottomSheetState();
@@ -341,21 +432,13 @@ class _BookingBottomSheetState extends State<_BookingBottomSheet> {
       firstDate: DateTime.now(),
       lastDate: DateTime.now().add(const Duration(days: 60)),
     );
-
-    if (date != null) {
-      setState(() => selectedDate = date);
-    }
+    if (date != null) setState(() => selectedDate = date);
   }
 
   Future<void> _pickTime() async {
-    final time = await showTimePicker(
-      context: context,
-      initialTime: TimeOfDay.now(),
-    );
-
-    if (time != null) {
-      setState(() => selectedTime = time);
-    }
+    final time =
+        await showTimePicker(context: context, initialTime: TimeOfDay.now());
+    if (time != null) setState(() => selectedTime = time);
   }
 
   @override
@@ -374,7 +457,7 @@ class _BookingBottomSheetState extends State<_BookingBottomSheet> {
           Text('Select Date & Time', style: AppTextStyles.headingSmall),
           Text(
             'Choose a date and time to check availability and book',
-            style: AppTextStyles.caption.copyWith(color: AppColors.black),
+            style: AppTextStyles.caption,
           ),
           const SizedBox(height: 20),
 
@@ -385,10 +468,8 @@ class _BookingBottomSheetState extends State<_BookingBottomSheet> {
             icon: Iconsax.calendar_1_copy,
             onTap: _pickDate,
           ),
-
           const SizedBox(height: 12),
 
-          /// Time Picker
           _pickerTile(
             title: selectedTime == null
                 ? 'Select Time'
@@ -396,7 +477,6 @@ class _BookingBottomSheetState extends State<_BookingBottomSheet> {
             icon: Icons.access_time,
             onTap: _pickTime,
           ),
-
           const SizedBox(height: 24),
 
           CustomButton(
@@ -404,6 +484,8 @@ class _BookingBottomSheetState extends State<_BookingBottomSheet> {
             color: AppColors.primaryColor,
             horizontal: 0,
             onPressed: () {
+              print(selectedDate );
+              print(selectedTime);
               if (selectedDate == null || selectedTime == null) {
                 showCustomSnackBar(
                   message: 'Please select date and time',
@@ -411,11 +493,7 @@ class _BookingBottomSheetState extends State<_BookingBottomSheet> {
                 );
                 return;
               }
-
               Get.to(MenuItemWidget());
-
-              print('Date: $selectedDate');
-              print('Time: $selectedTime');
             },
           ),
         ],
@@ -440,17 +518,11 @@ class _BookingBottomSheetState extends State<_BookingBottomSheet> {
           children: [
             Icon(icon, color: AppColors.primaryColor),
             const SizedBox(width: 12),
-            Text(
-              title,
-              style: AppTextStyles.bodyMedium.copyWith(
-                color: AppColors.black,
-                fontWeight: FontWeight.bold,
-                fontFamily: AppFonts.regular,
-              ),
-            ),
+            Text(title, style: AppTextStyles.bodyMedium),
           ],
         ),
       ),
     );
   }
+
 }

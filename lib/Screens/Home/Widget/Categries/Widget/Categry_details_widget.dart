@@ -131,7 +131,12 @@ class _CategryDetailsWidgetState extends State<CategryDetailsWidget> {
                         return SizedBox(
                           width: itemWidth,
                           child: GestureDetector(
-                            onTap: () => Get.to(ProductDetailsPageWidget()),
+                            onTap: () => Get.to(ProductDetailsPageWidget(
+                              cattId: item.categoryID.toString(),
+                              hostId: item.hostID.toString(),
+                              subCatId:item.subCategoryID.toString() ,
+                              locationId: item.locationID.toString(),
+                            )),
                             child: categoryCard(
                               title: item.subCategoryName ?? '',
                               host: (item.hostName ?? '').toUpperCase(),

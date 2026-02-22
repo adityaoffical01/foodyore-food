@@ -9,6 +9,8 @@ class AppUrl {
   static String login_user(String user_id) => '$baseSlugUrl/users/$user_id';
   // for home
   static const String homeGalleryUrls = '$baseSlugUrl/home/gallery';
+  static const String getHostDecyUrls = '$baseSlugUrl/products/host-descriptions/';
+  static const String getAmenitiesyUrls = '$baseSlugUrl/products/amenities?';
 
   // for products
   static const String categroryUrls = '$baseSlugUrl/products/categories';
