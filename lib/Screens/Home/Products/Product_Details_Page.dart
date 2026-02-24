@@ -54,7 +54,7 @@ class _ProductDetailsPageWidgetState extends State<ProductDetailsPageWidget> {
       widget.subCatId,
       widget.hostId,
       widget.locationId,
-    ); // 🔴 pass real hostId
+    );
   }
 
   @override
@@ -111,6 +111,7 @@ class _ProductDetailsPageWidgetState extends State<ProductDetailsPageWidget> {
       'assets/images/formland.jpg',
       'assets/images/formland.jpg',
       'assets/images/formland.jpg',
+      // ignore: unnecessary_null_comparison
     ].where((e) => e != null && e.isNotEmpty).toList();
 
     return Stack(
