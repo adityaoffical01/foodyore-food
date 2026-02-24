@@ -19,11 +19,17 @@ import 'package:foodyore/utils/styles/Custom_circular_button.dart';
 import 'package:foodyore/utils/styles/Text_Styles.dart';
 
 class ProductDetailsPageWidget extends StatefulWidget {
-final String hostId;
-final String cattId;
-final String subCatId;
-final String locationId;
-  const ProductDetailsPageWidget({Key? key, required this.hostId, required this.cattId, required this.subCatId, required this.locationId}) : super(key: key);
+  final String hostId;
+  final String cattId;
+  final String subCatId;
+  final String locationId;
+  const ProductDetailsPageWidget({
+    Key? key,
+    required this.hostId,
+    required this.cattId,
+    required this.subCatId,
+    required this.locationId,
+  }) : super(key: key);
 
   @override
   State<ProductDetailsPageWidget> createState() =>
@@ -34,14 +40,21 @@ class _ProductDetailsPageWidgetState extends State<ProductDetailsPageWidget> {
   final PageController _pageController = PageController();
   int _currentIndex = 0;
 
-  final HostDescriptionsControlller controller =
-      Get.put(HostDescriptionsControlller());
+  final HostDescriptionsControlller controller = Get.put(
+    HostDescriptionsControlller(),
+  );
 
   @override
   void initState() {
     super.initState();
     controller.fetchHostData(context, widget.hostId); // 🔴 pass real hostId
-    controller.fetcAnimatesData(context, widget.cattId, widget.subCatId, widget.hostId, widget.locationId) ; // 🔴 pass real hostId
+    controller.fetcAnimatesData(
+      context,
+      widget.cattId,
+      widget.subCatId,
+      widget.hostId,
+      widget.locationId,
+    ); // 🔴 pass real hostId
   }
 
   @override
@@ -63,8 +76,7 @@ class _ProductDetailsPageWidgetState extends State<ProductDetailsPageWidget> {
             );
           }
 
-          final Data? data =
-              controller.hostDescripetionsModel.value.data?.data;
+          final Data? data = controller.hostDescripetionsModel.value.data?.data;
 
           if (data == null) {
             return const Center(child: Text("No data found"));
@@ -73,10 +85,7 @@ class _ProductDetailsPageWidgetState extends State<ProductDetailsPageWidget> {
           return SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildImageSlider(data),
-                _buildContentSection(data),
-              ],
+              children: [_buildImageSlider(data), _buildContentSection(data)],
             ),
           );
         }),
@@ -98,11 +107,11 @@ class _ProductDetailsPageWidgetState extends State<ProductDetailsPageWidget> {
     //   data.hostDescription?.fileUpload4,
     // ].where((e) => e != null && e.isNotEmpty).toList();
 
-  final List<String> images = [
-    'assets/images/formland.jpg',
-    'assets/images/formland.jpg',
-    'assets/images/formland.jpg',
-  ].where((e) => e != null && e.isNotEmpty).toList();
+    final List<String> images = [
+      'assets/images/formland.jpg',
+      'assets/images/formland.jpg',
+      'assets/images/formland.jpg',
+    ].where((e) => e != null && e.isNotEmpty).toList();
 
     return Stack(
       children: [
@@ -112,8 +121,7 @@ class _ProductDetailsPageWidgetState extends State<ProductDetailsPageWidget> {
           child: PageView.builder(
             controller: _pageController,
             itemCount: images.length,
-            onPageChanged: (index) =>
-                setState(() => _currentIndex = index),
+            onPageChanged: (index) => setState(() => _currentIndex = index),
             itemBuilder: (_, index) => Image.asset(
               images[index]!,
               fit: BoxFit.cover,
@@ -191,10 +199,7 @@ class _ProductDetailsPageWidgetState extends State<ProductDetailsPageWidget> {
           _buildBreadcrumbs(data),
           const SizedBox(height: 8),
 
-          Text(
-            host?.descriptionTitle ?? '',
-            style: AppTextStyles.headingSmall,
-          ),
+          Text(host?.descriptionTitle ?? '', style: AppTextStyles.headingSmall),
           const SizedBox(height: 5),
 
           _sectionTitle('About the Experience'),
@@ -205,7 +210,7 @@ class _ProductDetailsPageWidgetState extends State<ProductDetailsPageWidget> {
           _buildMapSection(location),
 
           // const SizedBox(height: 60),
-             const SizedBox(height: 12),
+          const SizedBox(height: 12),
           _sectionTitle('What to Expect'),
           _expectationSection(),
           const SizedBox(height: 60),
@@ -213,74 +218,74 @@ class _ProductDetailsPageWidgetState extends State<ProductDetailsPageWidget> {
       ),
     );
   }
+
   Widget _expectationSection() {
-  return Obx(() {
-    if (controller.animatesListModel.value.status == Status.LOADING) {
-      return const SizedBox(
-        height: 100,
-        child: Center(child: CircularProgressIndicator()),
-      );
-    }
-
-    final amenities =
-        controller.animatesListModel.value.data?.amenitiesData ?? [];
-
-    if (amenities.isEmpty) {
-      return const SizedBox(); // UI clean
-    }
-
-    return Wrap(
-      spacing: 12,
-      runSpacing: 12,
-      children: amenities.map((item) {
-        return _expectationCard(item);
-      }).toList(),
-    );
-  });
-}
-Widget _expectationCard(AmenitiesData item) {
-  return Stack(
-    children: [
-      ClipRRect(
-        borderRadius: BorderRadius.circular(20),
-        child: Image.network(
-          item.amenitieImage ?? '',
-          width: 160,
+    return Obx(() {
+      if (controller.animatesListModel.value.status == Status.LOADING) {
+        return const SizedBox(
           height: 100,
-          fit: BoxFit.cover,
-          errorBuilder: (_, __, ___) => Image.asset(
-            'assets/images/fire.jpg',
+          child: Center(child: CircularProgressIndicator()),
+        );
+      }
+
+      final amenities =
+          controller.animatesListModel.value.data?.amenitiesData ?? [];
+
+      if (amenities.isEmpty) {
+        return const SizedBox(); // UI clean
+      }
+
+      return Wrap(
+        spacing: 12,
+        runSpacing: 12,
+        children: amenities.map((item) {
+          return _expectationCard(item);
+        }).toList(),
+      );
+    });
+  }
+
+  Widget _expectationCard(AmenitiesData item) {
+    return Stack(
+      children: [
+        ClipRRect(
+          borderRadius: BorderRadius.circular(20),
+          child: Image.network(
+            item.amenitieImage ?? '',
             width: 160,
             height: 100,
             fit: BoxFit.cover,
+            errorBuilder: (_, __, ___) => Image.asset(
+              'assets/images/fire.jpg',
+              width: 160,
+              height: 100,
+              fit: BoxFit.cover,
+            ),
           ),
         ),
-      ),
-      Positioned(
-        bottom: 6,
-        left: 15,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              item.amenitieType ?? '',
-              style: AppTextStyles.bodySmall.copyWith(
-                color: AppColors.white,
-                fontWeight: FontWeight.bold,
+        Positioned(
+          bottom: 6,
+          left: 15,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                item.amenitieType ?? '',
+                style: AppTextStyles.bodySmall.copyWith(
+                  color: AppColors.white,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            ),
-            Text(
-              '₹${item.price ?? 0} ${item.unit ?? ''}',
-              style: AppTextStyles.bodySmall.copyWith(
-                color: AppColors.white,
+              Text(
+                '₹${item.price ?? 0} ${item.unit ?? ''}',
+                style: AppTextStyles.bodySmall.copyWith(color: AppColors.white),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
-      ),
-    ],
-  );
-}
+      ],
+    );
+  }
 
   Widget _buildBreadcrumbs(Data data) {
     return Row(
@@ -312,9 +317,9 @@ Widget _expectationCard(AmenitiesData item) {
   }
 
   Widget _dot() => const Padding(
-        padding: EdgeInsets.symmetric(horizontal: 4),
-        child: Icon(Icons.circle, size: 6),
-      );
+    padding: EdgeInsets.symmetric(horizontal: 4),
+    child: Icon(Icons.circle, size: 6),
+  );
 
   Widget _sectionTitle(String title) {
     return Text(
@@ -436,8 +441,10 @@ class _BookingBottomSheetState extends State<_BookingBottomSheet> {
   }
 
   Future<void> _pickTime() async {
-    final time =
-        await showTimePicker(context: context, initialTime: TimeOfDay.now());
+    final time = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.now(),
+    );
     if (time != null) setState(() => selectedTime = time);
   }
 
@@ -484,7 +491,7 @@ class _BookingBottomSheetState extends State<_BookingBottomSheet> {
             color: AppColors.primaryColor,
             horizontal: 0,
             onPressed: () {
-              print(selectedDate );
+              print(selectedDate);
               print(selectedTime);
               if (selectedDate == null || selectedTime == null) {
                 showCustomSnackBar(
@@ -524,5 +531,4 @@ class _BookingBottomSheetState extends State<_BookingBottomSheet> {
       ),
     );
   }
-
 }
