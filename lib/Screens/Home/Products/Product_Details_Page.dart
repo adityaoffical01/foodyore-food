@@ -1,15 +1,14 @@
-// ignore_for_file: deprecated_member_use
-
+// ignore_for_file: deprecated_member_use, unnecessary_null_comparison
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:foodyore/controller/host_descriptions_controlller.dart';
 import 'package:foodyore/data/response/api_status.dart';
 import 'package:foodyore/model/amenities_list_model.dart';
+import 'package:foodyore/res/app_urls.dart';
+import 'package:foodyore/utils/helpers/Custom/Custom_Loder.dart';
 import 'package:get/get.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
-
 import 'package:foodyore/model/host_descripetions_model.dart';
-
 import 'package:foodyore/Screens/Home/Menu/Menu_Item_Widget.dart';
 import 'package:foodyore/utils/helpers/App_Content.dart';
 import 'package:foodyore/utils/Colors/AppColors.dart';
@@ -19,31 +18,33 @@ import 'package:foodyore/utils/styles/Custom_circular_button.dart';
 import 'package:foodyore/utils/styles/Text_Styles.dart';
 
 class ProductDetailsPageWidget extends StatefulWidget {
-final String hostId;
-final String cattId;
-final String subCatId;
-final String locationId;
-  const ProductDetailsPageWidget({Key? key, required this.hostId, required this.cattId, required this.subCatId, required this.locationId}) : super(key: key);
-
+  final String hostId;
+  final String cattId;
+  final String subCatId;
+  final String locationId;
+  const ProductDetailsPageWidget({
+    Key? key,
+    required this.hostId,
+    required this.cattId,
+    required this.subCatId,
+    required this.locationId,
+  }) : super(key: key);
   @override
   State<ProductDetailsPageWidget> createState() =>
       _ProductDetailsPageWidgetState();
 }
-
 class _ProductDetailsPageWidgetState extends State<ProductDetailsPageWidget> {
   final PageController _pageController = PageController();
   int _currentIndex = 0;
-
-  final HostDescriptionsControlller controller =
-      Get.put(HostDescriptionsControlller());
-
+  final HostDescriptionsControlller controller = Get.put(
+  HostDescriptionsControlller(),
+  );
   @override
   void initState() {
     super.initState();
     controller.fetchHostData(context, widget.hostId); 
     controller.fetcAnimatesData(context, widget.cattId, widget.subCatId, widget.hostId, widget.locationId) ; 
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -51,9 +52,10 @@ class _ProductDetailsPageWidgetState extends State<ProductDetailsPageWidget> {
       body: CustomBackground(
         child: Obx(() {
           if (controller.rxRequestStatus.value == Status.LOADING) {
-            return const Center(child: CircularProgressIndicator());
+            return const Center(
+              child: CustomLoder(color: AppColors.primaryColor),
+            );
           }
-
           if (controller.rxRequestStatus.value == Status.ERROR) {
             return Center(
               child: Text(
@@ -62,10 +64,7 @@ class _ProductDetailsPageWidgetState extends State<ProductDetailsPageWidget> {
               ),
             );
           }
-
-          final Data? data =
-              controller.hostDescripetionsModel.value.data?.data;
-
+          final Data? data = controller.hostDescripetionsModel.value.data?.data;
           if (data == null) {
             return const Center(child: Text("No data found"));
           }
@@ -73,10 +72,7 @@ class _ProductDetailsPageWidgetState extends State<ProductDetailsPageWidget> {
           return SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildImageSlider(data),
-                _buildContentSection(data),
-              ],
+              children: [_buildImageSlider(data), _buildContentSection(data)],
             ),
           );
         }),
@@ -87,23 +83,12 @@ class _ProductDetailsPageWidgetState extends State<ProductDetailsPageWidget> {
       ),
     );
   }
-
   /* ---------------------------- IMAGE SLIDER ---------------------------- */
-
   Widget _buildImageSlider(Data data) {
-    // final images = [
-    //   data.hostDescription?.fileUpload1,
-    //   data.hostDescription?.fileUpload2,
-    //   data.hostDescription?.fileUpload3,
-    //   data.hostDescription?.fileUpload4,
-    // ].where((e) => e != null && e.isNotEmpty).toList();
-
-  final List<String> images = [
-    'assets/images/formland.jpg',
-    'assets/images/formland.jpg',
-    'assets/images/formland.jpg',
-  ].where((e) => e != null && e.isNotEmpty).toList();
-
+    final List<String> images = data.hostDescription?.imageUploads ?? [];
+    final List<String> sliderImages = images.isNotEmpty
+        ? images
+        : ['assets/images/formland.jpg'];
     return Stack(
       children: [
         SizedBox(
@@ -121,7 +106,6 @@ class _ProductDetailsPageWidgetState extends State<ProductDetailsPageWidget> {
             ),
           ),
         ),
-
         /// Indicator
         Positioned(
           bottom: 12,
@@ -130,7 +114,7 @@ class _ProductDetailsPageWidgetState extends State<ProductDetailsPageWidget> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: List.generate(
-              images.length,
+              sliderImages.length,
               (index) => AnimatedContainer(
                 duration: const Duration(milliseconds: 300),
                 margin: const EdgeInsets.symmetric(horizontal: 4),
@@ -146,7 +130,6 @@ class _ProductDetailsPageWidgetState extends State<ProductDetailsPageWidget> {
             ),
           ),
         ),
-
         /// Top Buttons
         Positioned(
           top: 60,
@@ -166,7 +149,6 @@ class _ProductDetailsPageWidgetState extends State<ProductDetailsPageWidget> {
       ],
     );
   }
-
   Widget _circleButton({required IconData icon, VoidCallback? onTap}) {
     return GestureDetector(
       onTap: onTap,
@@ -176,13 +158,10 @@ class _ProductDetailsPageWidgetState extends State<ProductDetailsPageWidget> {
       ),
     );
   }
-
   /* ---------------------------- CONTENT ---------------------------- */
-
   Widget _buildContentSection(Data data) {
     final host = data.hostDescription;
     final location = data.location;
-
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
       child: Column(
@@ -190,98 +169,86 @@ class _ProductDetailsPageWidgetState extends State<ProductDetailsPageWidget> {
         children: [
           _buildBreadcrumbs(data),
           const SizedBox(height: 8),
-
-          Text(
-            host?.descriptionTitle ?? '',
-            style: AppTextStyles.headingSmall,
-          ),
+          Text(host?.descriptionTitle ?? '', style: AppTextStyles.headingSmall),
           const SizedBox(height: 5),
-
           _sectionTitle('About the Experience'),
           _paragraph(host?.description ?? ''),
-
           const SizedBox(height: 10),
           _sectionTitle('Location'),
           _buildMapSection(location),
-
           // const SizedBox(height: 60),
-             const SizedBox(height: 12),
+          const SizedBox(height: 12),
           _sectionTitle('What to Expect'),
+          const SizedBox(height: 10),
           _expectationSection(),
-          const SizedBox(height: 60),
+          const SizedBox(height: 80),
         ],
       ),
     );
   }
   Widget _expectationSection() {
-  return Obx(() {
-    if (controller.animatesListModel.value.status == Status.LOADING) {
-      return const SizedBox(
-        height: 100,
-        child: Center(child: CircularProgressIndicator()),
-      );
-    }
-
-    final amenities =
-        controller.animatesListModel.value.data?.amenitiesData ?? [];
-
-    if (amenities.isEmpty) {
-      return const SizedBox(); // UI clean
-    }
-
-    return Wrap(
-      spacing: 12,
-      runSpacing: 12,
-      children: amenities.map((item) {
-        return _expectationCard(item);
-      }).toList(),
-    );
-  });
-}
-Widget _expectationCard(AmenitiesData item) {
-  return Stack(
-    children: [
-      ClipRRect(
-        borderRadius: BorderRadius.circular(20),
-        child: Image.network(
-          item.amenitieImage ?? '',
-          width: 160,
+    return Obx(() {
+      if (controller.animatesListModel.value.status == Status.LOADING) {
+        return const SizedBox(
           height: 100,
-          fit: BoxFit.cover,
-          errorBuilder: (_, __, ___) => Image.asset(
-            'assets/images/fire.jpg',
+          child: Center(child: CircularProgressIndicator()),
+        );
+      }
+      final amenities =
+          controller.animatesListModel.value.data?.amenitiesData ?? [];
+      if (amenities.isEmpty) {
+        return const SizedBox(); // UI clean
+      }
+      return Wrap(
+        spacing: 12,
+        runSpacing: 12,
+        children: amenities.map((item) {
+          return _expectationCard(item);
+        }).toList(),
+      );
+    });
+  }
+  Widget _expectationCard(AmenitiesData item) {
+    return Stack(
+      children: [
+        ClipRRect(
+          borderRadius: BorderRadius.circular(20),
+          child: Image.network(
+            item.amenitieImage ?? '',
             width: 160,
             height: 100,
             fit: BoxFit.cover,
+            errorBuilder: (_, __, ___) => Image.asset(
+              'assets/images/fire.jpg',
+              width: 160,
+              height: 100,
+              fit: BoxFit.cover,
+            ),
           ),
         ),
-      ),
-      Positioned(
-        bottom: 6,
-        left: 15,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              item.amenitieType ?? '',
-              style: AppTextStyles.bodySmall.copyWith(
-                color: AppColors.white,
-                fontWeight: FontWeight.bold,
+        Positioned(
+          bottom: 6,
+          left: 15,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                item.amenitieType ?? '',
+                style: AppTextStyles.bodySmall.copyWith(
+                  color: AppColors.white,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            ),
-            Text(
-              '₹${item.price ?? 0} ${item.unit ?? ''}',
-              style: AppTextStyles.bodySmall.copyWith(
-                color: AppColors.white,
+              Text(
+                '₹${item.price ?? 0} ${item.unit ?? ''}',
+                style: AppTextStyles.bodySmall.copyWith(color: AppColors.white),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
-      ),
-    ],
-  );
-}
-
+      ],
+    );
+  }
   Widget _buildBreadcrumbs(Data data) {
     return Row(
       children: [
@@ -298,7 +265,6 @@ Widget _expectationCard(AmenitiesData item) {
       ],
     );
   }
-
   Widget _breadcrumbText(String text, {bool bold = false}) {
     return Text(
       text,
@@ -312,9 +278,9 @@ Widget _expectationCard(AmenitiesData item) {
   }
 
   Widget _dot() => const Padding(
-        padding: EdgeInsets.symmetric(horizontal: 4),
-        child: Icon(Icons.circle, size: 6),
-      );
+    padding: EdgeInsets.symmetric(horizontal: 4),
+    child: Icon(Icons.circle, size: 6),
+  );
 
   Widget _sectionTitle(String title) {
     return Text(
@@ -436,8 +402,10 @@ class _BookingBottomSheetState extends State<_BookingBottomSheet> {
   }
 
   Future<void> _pickTime() async {
-    final time =
-        await showTimePicker(context: context, initialTime: TimeOfDay.now());
+    final time = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.now(),
+    );
     if (time != null) setState(() => selectedTime = time);
   }
 
@@ -484,7 +452,7 @@ class _BookingBottomSheetState extends State<_BookingBottomSheet> {
             color: AppColors.primaryColor,
             horizontal: 0,
             onPressed: () {
-              print(selectedDate );
+              print(selectedDate);
               print(selectedTime);
               if (selectedDate == null || selectedTime == null) {
                 showCustomSnackBar(
@@ -524,5 +492,4 @@ class _BookingBottomSheetState extends State<_BookingBottomSheet> {
       ),
     );
   }
-
 }

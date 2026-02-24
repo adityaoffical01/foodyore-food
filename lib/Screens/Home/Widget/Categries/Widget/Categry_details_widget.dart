@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:foodyore/Screens/Home/Products/Product_Details_Page.dart';
+import 'package:foodyore/Screens/Home/Widget/Categries/Widget/category_card_widget.dart';
+import 'package:foodyore/Screens/Home/Widget/Categries/Widget/choose_yore_destination.dart';
 import 'package:foodyore/controller/category_controller.dart';
 import 'package:foodyore/data/response/api_status.dart';
 import 'package:foodyore/model/category_model.dart';
@@ -7,9 +9,7 @@ import 'package:foodyore/utils/Colors/AppColors.dart';
 import 'package:foodyore/utils/helpers/Custom/Custom_AppBar.dart';
 import 'package:foodyore/utils/helpers/Custom/Custom_Loder.dart';
 import 'package:foodyore/utils/helpers/Custom/Custom_screen_background.dart';
-import 'package:foodyore/utils/styles/Text_Styles.dart';
 import 'package:get/get.dart';
-import 'package:iconsax_flutter/iconsax_flutter.dart';
 
 class CategryDetailsWidget extends StatefulWidget {
   final CategoryItem? catItem;
@@ -22,38 +22,7 @@ class CategryDetailsWidget extends StatefulWidget {
 class _CategryDetailsWidgetState extends State<CategryDetailsWidget> {
   final CategoryController categoryController = Get.find<CategoryController>();
   final ScrollController _scrollController = ScrollController();
-  final items = [
-    {
-      "title": "Orchards",
-      "host": "Aditya Singh",
-      "location": "Lucknow",
-      "btn": "View 2 Available Options",
-    },
-    {
-      "title": "Agricultural Land",
-      "host": "Nitya Singh",
-      "location": "Lucknow",
-      "btn": "View 1 Available Options",
-    },
-    {
-      "title": "Orchards",
-      "host": "Aditya Singh",
-      "location": "Lucknow",
-      "btn": "View 2 Available Options",
-    },
-    {
-      "title": "Agricultural Land",
-      "host": "Nitya Singh",
-      "location": "Lucknow",
-      "btn": "View 1 Available Options",
-    },
-    {
-      "title": "Orchards",
-      "host": "Aditya Singh",
-      "location": "Lucknow",
-      "btn": "View 2 Available Options",
-    },
-  ];
+
   @override
   void initState() {
     super.initState();
@@ -122,6 +91,7 @@ class _CategryDetailsWidgetState extends State<CategryDetailsWidget> {
                 final subCategories = response.data!.data!;
 
                 return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Wrap(
                       spacing: spacing,
@@ -131,17 +101,37 @@ class _CategryDetailsWidgetState extends State<CategryDetailsWidget> {
                         return SizedBox(
                           width: itemWidth,
                           child: GestureDetector(
-                            onTap: () => Get.to(ProductDetailsPageWidget(
-                              cattId: item.categoryID.toString(),
-                              hostId: item.hostID.toString(),
-                              subCatId:item.subCategoryID.toString() ,
-                              locationId: item.locationID.toString(),
-                            )),
+                            onTap: () {
+                              print('Item: ${item.toJson()}');
+                              if (widget.catItem!.categoryName!
+                                  .toLowerCase()
+                                  .contains('farm land')) {
+                                Get.to(
+                                  ChooseDestinationWidget(
+                                    subCategoryItem: item,
+                                  ),
+                                );
+                              } else {
+                                Get.to(
+                                  ProductDetailsPageWidget(
+                                    cattId: item.categoryID.toString(),
+                                    hostId: item.hostID.toString(),
+                                    subCatId: item.subCategoryID.toString(),
+                                    locationId: item.locationID.toString(),
+                                  ),
+                                );
+                              }
+                            },
                             child: categoryCard(
                               title: item.subCategoryName ?? '',
                               host: (item.hostName ?? '').toUpperCase(),
-                              location: item.address2 ?? '',
-                              buttonText: "View Details",
+                              location: item.city ?? '',
+                              buttonText:
+                                  widget.catItem!.categoryName!
+                                      .toLowerCase()
+                                      .contains('farm land')
+                                  ? "View Avalible Option"
+                                  : "View Details",
                             ),
                           ),
                         );
@@ -154,116 +144,17 @@ class _CategryDetailsWidgetState extends State<CategryDetailsWidget> {
                       ),
                     if (!categoryController.hasMoreSubCategories.value &&
                         subCategories.isNotEmpty)
-                      const Padding(
-                        padding: EdgeInsets.only(top: 8, bottom: 4),
-                        child: Text('No more data'),
+                      Center(
+                        child: const Padding(
+                          padding: EdgeInsets.only(top: 8, bottom: 4),
+                          child: Text('No more data'),
+                        ),
                       ),
                   ],
                 );
               }),
             );
           },
-        ),
-      ),
-    );
-  }
-
-  // for card
-  Widget categoryCard({
-    required String title,
-    required String host,
-    required String location,
-    required String buttonText,
-  }) {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(16),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            AspectRatio(
-              aspectRatio: 16 / 9,
-              child: Image.asset(
-                'assets/images/formland.jpg',
-                fit: BoxFit.cover,
-                width: double.infinity,
-              ),
-            ),
-
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: AppTextStyles.bodySmall.copyWith(
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.black,
-                    ),
-                  ),
-                  RichText(
-                    text: TextSpan(
-                      text: 'Hosted by ',
-                      style: AppTextStyles.caption.copyWith(
-                        color: AppColors.black,
-                      ),
-                      children: [
-                        TextSpan(
-                          text: host,
-                          style: AppTextStyles.caption.copyWith(
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Row(
-                    children: [
-                      Icon(
-                        Iconsax.location,
-                        size: 10,
-                        color: AppColors.primaryColor,
-                      ),
-                      const SizedBox(width: 4),
-                      Expanded(
-                        child: Text(
-                          location,
-                          overflow: TextOverflow.ellipsis,
-                          style: AppTextStyles.caption.copyWith(
-                            color: AppColors.black,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-
-            // ❌ Spacer REMOVED
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(vertical: 8),
-              color: AppColors.primaryColor,
-              child: Center(
-                child: Text(
-                  buttonText,
-                  style: AppTextStyles.caption.copyWith(
-                    color: AppColors.white,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ),
-            ),
-          ],
         ),
       ),
     );
