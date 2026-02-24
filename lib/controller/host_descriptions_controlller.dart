@@ -54,12 +54,8 @@ class HostDescriptionsControlller extends GetxController {
           update();
         });
   }
-
-
-
   void fetcAnimatesData(BuildContext context, String catId, String subCatId, String hostId, String locationId ) async {
     isLoading.value = true;
-
     setRxRequestStatus(Status.LOADING);
     update();
       final url =
