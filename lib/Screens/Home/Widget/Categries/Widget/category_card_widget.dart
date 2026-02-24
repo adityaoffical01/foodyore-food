@@ -61,8 +61,9 @@ Widget categoryCard({
                         ),
                       )
                     : const SizedBox.shrink(),
+                const SizedBox(height: 3),
                 Row(
-                  // crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Icon(
                       Iconsax.location,

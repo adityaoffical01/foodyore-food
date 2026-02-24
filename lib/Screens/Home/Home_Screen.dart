@@ -13,7 +13,6 @@ import 'package:foodyore/Screens/Widget/home/footer_section.dart';
 import 'package:foodyore/Screens/Widget/home/hero_section.dart';
 import 'package:foodyore/Screens/Widget/home/intro_section.dart';
 import 'package:foodyore/controller/category_controller.dart';
-import 'package:foodyore/controller/home_gallery_controller.dart';
 import 'package:foodyore/services/app_config.dart';
 import 'package:foodyore/utils/Colors/AppColors.dart';
 import 'package:foodyore/utils/helpers/App_Content.dart';

@@ -44,8 +44,6 @@ class SubCategoryItem {
   final String? pinCode;
   final double? latitude;
   final double? longitude;
-  final String? farmLandTitile;
-  final String? farmLandCatId;
 
   SubCategoryItem({
     this.subCategoryID,
@@ -64,8 +62,6 @@ class SubCategoryItem {
     this.pinCode,
     this.latitude,
     this.longitude,
-    this.farmLandTitile,
-    this.farmLandCatId,
   });
 
   factory SubCategoryItem.fromJson(Map<String, dynamic> json) {
@@ -80,9 +76,9 @@ class SubCategoryItem {
       locationID: json["LocationID"]?.toString(),
       address1: json["Address1"]?.toString(),
       address2: json["Address2"]?.toString(),
-      city: json["City"]?.toString(),
-      state: json["State"]?.toString(),
-      country: json["Country"]?.toString(),
+      city: json["CityName"]?.toString(),
+      state: json["StateName"]?.toString(),
+      country: json["CountryName"]?.toString(),
       pinCode: json["PinCode"]?.toString(),
       latitude: json["Latitude"] != null
           ? double.tryParse(json["Latitude"].toString())
@@ -90,8 +86,6 @@ class SubCategoryItem {
       longitude: json["Longitude"] != null
           ? double.tryParse(json["Longitude"].toString())
           : null,
-      farmLandTitile: json['TitleName'] ?? '',
-      farmLandCatId: json['TitleID']?.toString() ?? '',
     );
   }
 
@@ -107,14 +101,12 @@ class SubCategoryItem {
       "LocationID": locationID,
       "Address1": address1,
       "Address2": address2,
-      "City": city,
-      "State": state,
-      "Country": country,
+      "CityName": city,
+      "StateName": state,
+      "CountryName": country,
       "PinCode": pinCode,
       "Latitude": latitude,
       "Longitude": longitude,
-      'TitleName': farmLandTitile,
-      'TitleID': farmLandCatId,
     };
   }
 }

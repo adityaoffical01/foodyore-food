@@ -1,10 +1,12 @@
-// ignore_for_file: deprecated_member_use
+// ignore_for_file: deprecated_member_use, unnecessary_null_comparison
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:foodyore/controller/host_descriptions_controlller.dart';
 import 'package:foodyore/data/response/api_status.dart';
 import 'package:foodyore/model/amenities_list_model.dart';
+import 'package:foodyore/res/app_urls.dart';
+import 'package:foodyore/utils/helpers/Custom/Custom_Loder.dart';
 import 'package:get/get.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 
@@ -58,13 +60,29 @@ class _ProductDetailsPageWidgetState extends State<ProductDetailsPageWidget> {
   }
 
   @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  String _resolveImagePath(String rawPath) {
+    final path = rawPath.trim().replaceAll('\\', '/');
+    if (path.startsWith('http://') || path.startsWith('https://')) return path;
+    if (path.startsWith('assets/')) return path;
+    if (path.startsWith('/')) return '${AppUrl.imageUrl}$path';
+    return '${AppUrl.imageUrl}/$path';
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.backgroundColor,
       body: CustomBackground(
         child: Obx(() {
           if (controller.rxRequestStatus.value == Status.LOADING) {
-            return const Center(child: CircularProgressIndicator());
+            return const Center(
+              child: CustomLoder(color: AppColors.primaryColor),
+            );
           }
 
           if (controller.rxRequestStatus.value == Status.ERROR) {
@@ -100,19 +118,10 @@ class _ProductDetailsPageWidgetState extends State<ProductDetailsPageWidget> {
   /* ---------------------------- IMAGE SLIDER ---------------------------- */
 
   Widget _buildImageSlider(Data data) {
-    // final images = [
-    //   data.hostDescription?.fileUpload1,
-    //   data.hostDescription?.fileUpload2,
-    //   data.hostDescription?.fileUpload3,
-    //   data.hostDescription?.fileUpload4,
-    // ].where((e) => e != null && e.isNotEmpty).toList();
-
-    final List<String> images = [
-      'assets/images/formland.jpg',
-      'assets/images/formland.jpg',
-      'assets/images/formland.jpg',
-      // ignore: unnecessary_null_comparison
-    ].where((e) => e != null && e.isNotEmpty).toList();
+    final List<String> images = data.hostDescription?.imageUploads ?? [];
+    final List<String> sliderImages = images.isNotEmpty
+        ? images
+        : ['assets/images/formland.jpg'];
 
     return Stack(
       children: [
@@ -121,13 +130,38 @@ class _ProductDetailsPageWidgetState extends State<ProductDetailsPageWidget> {
           width: double.infinity,
           child: PageView.builder(
             controller: _pageController,
-            itemCount: images.length,
+            itemCount: sliderImages.length,
             onPageChanged: (index) => setState(() => _currentIndex = index),
-            itemBuilder: (_, index) => Image.asset(
-              images[index]!,
-              fit: BoxFit.cover,
-              width: double.infinity,
-            ),
+            itemBuilder: (_, index) {
+              final imagePath = _resolveImagePath(sliderImages[index]);
+              final isAssetImage = imagePath.startsWith('assets/');
+
+              if (isAssetImage) {
+                return Image.asset(
+                  imagePath,
+                  fit: BoxFit.cover,
+                  width: double.infinity,
+                );
+              }
+
+              return Image.network(
+                imagePath,
+                fit: BoxFit.cover,
+                width: double.infinity,
+                errorBuilder: (_, __, ___) => Container(
+                  height: 260,
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: AppColors.textHintColor.withAlpha(40),
+                  ),
+                  child: Icon(
+                    Iconsax.image,
+                    size: 50,
+                    color: AppColors.primaryColor,
+                  ),
+                ),
+              );
+            },
           ),
         ),
 
@@ -139,7 +173,7 @@ class _ProductDetailsPageWidgetState extends State<ProductDetailsPageWidget> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: List.generate(
-              images.length,
+              sliderImages.length,
               (index) => AnimatedContainer(
                 duration: const Duration(milliseconds: 300),
                 margin: const EdgeInsets.symmetric(horizontal: 4),
@@ -213,8 +247,9 @@ class _ProductDetailsPageWidgetState extends State<ProductDetailsPageWidget> {
           // const SizedBox(height: 60),
           const SizedBox(height: 12),
           _sectionTitle('What to Expect'),
+          const SizedBox(height: 10),
           _expectationSection(),
-          const SizedBox(height: 60),
+          const SizedBox(height: 80),
         ],
       ),
     );

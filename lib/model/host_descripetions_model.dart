@@ -278,6 +278,14 @@ class HostDescription {
     }
   }
 
+  List<String> get imageUploads {
+    return [fileUpload1, fileUpload2, fileUpload3, fileUpload4]
+        .whereType<String>()
+        .map((e) => e.trim())
+        .where((e) => e.isNotEmpty)
+        .toList();
+  }
+
   static List<HostDescription> fromList(List<Map<String, dynamic>> list) {
     return list.map(HostDescription.fromJson).toList();
   }

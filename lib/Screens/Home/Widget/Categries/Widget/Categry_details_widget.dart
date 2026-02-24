@@ -91,6 +91,7 @@ class _CategryDetailsWidgetState extends State<CategryDetailsWidget> {
                 final subCategories = response.data!.data!;
 
                 return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Wrap(
                       spacing: spacing,
@@ -124,7 +125,7 @@ class _CategryDetailsWidgetState extends State<CategryDetailsWidget> {
                             child: categoryCard(
                               title: item.subCategoryName ?? '',
                               host: (item.hostName ?? '').toUpperCase(),
-                              location: item.address2 ?? '',
+                              location: item.city ?? '',
                               buttonText:
                                   widget.catItem!.categoryName!
                                       .toLowerCase()
@@ -143,9 +144,11 @@ class _CategryDetailsWidgetState extends State<CategryDetailsWidget> {
                       ),
                     if (!categoryController.hasMoreSubCategories.value &&
                         subCategories.isNotEmpty)
-                      const Padding(
-                        padding: EdgeInsets.only(top: 8, bottom: 4),
-                        child: Text('No more data'),
+                      Center(
+                        child: const Padding(
+                          padding: EdgeInsets.only(top: 8, bottom: 4),
+                          child: Text('No more data'),
+                        ),
                       ),
                   ],
                 );
