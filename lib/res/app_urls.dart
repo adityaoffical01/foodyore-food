@@ -12,10 +12,15 @@ class AppUrl {
 
   // for products
   static const String categroryUrls = '$baseSlugUrl/products/categories';
+  // for sub categroy
   static String subCategoryUrls(String categoryId, [String cursor = '']) {
     final String base =
         '$baseSlugUrl/products/categories/$categoryId/subcategories?limit=10';
     if (cursor.trim().isEmpty) return base;
     return '$base&cursor=$cursor';
   }
+
+  // for sub sub category
+  static String sub_sub_category(String cate_id, sub_cate_id, host_id) =>
+      '$baseSlugUrl/products/farm-land-titles?subCategoryId=$sub_cate_id&categoryId=$cate_id&hostId=$host_id';
 }

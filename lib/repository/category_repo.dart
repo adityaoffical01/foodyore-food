@@ -1,5 +1,6 @@
 import 'package:foodyore/data/network/network_api_services.dart';
 import 'package:foodyore/model/category_model.dart';
+import 'package:foodyore/model/farm_land_subCate_model.dart';
 import 'package:foodyore/model/sub_cate_model.dart';
 
 class CategoryRepo {
@@ -10,9 +11,14 @@ class CategoryRepo {
     return CategoryResponseModel.fromJson(response);
   }
 
-   Future<SubCategoryResponseModel> getSubCateData(String urls) async {
+  Future<SubCategoryResponseModel> getSubCateData(String urls) async {
     dynamic response = await _apiService.getApi(urls);
     return SubCategoryResponseModel.fromJson(response);
+  }
+
+  Future<FarmLandSubCategoryResponse> getFarmlandCateData(String urls) async {
+    dynamic response = await _apiService.getApi(urls);
+    return FarmLandSubCategoryResponse.fromJson(response);
   }
 
   Future<dynamic> postData(String urls, var data) async {

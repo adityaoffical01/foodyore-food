@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:foodyore/model/farm_land_subCate_model.dart';
 import 'package:foodyore/model/sub_cate_model.dart';
 import 'package:get/get.dart';
 import 'package:foodyore/data/response/api_response.dart';
@@ -19,6 +20,8 @@ class CategoryController extends GetxController {
   final RxBool hasMoreSubCategories = true.obs;
   final RxString nextSubCategoryCursor = ''.obs;
   final RxString selectedCategoryId = ''.obs;
+  Rx<ApiResponse<FarmLandSubCategoryResponse>> farmLandSubcate =
+      ApiResponse<FarmLandSubCategoryResponse>.loading().obs;
 
   /// Fetch Category List
   Future<void> fetchCategories(BuildContext context) async {
@@ -104,5 +107,27 @@ class CategoryController extends GetxController {
     final String categoryId = selectedCategoryId.value.trim();
     if (categoryId.isEmpty) return;
     await fetchSubCategories(context, categoryId, loadMore: true);
+  }
+
+  // form land category data list
+  Future<void> fetchFarmlandSubCate(
+    BuildContext context,
+    String cateID,
+    subCateID,
+    hostId,
+  ) async {
+    try {
+      farmLandSubcate.value = ApiResponse.loading();
+
+      final response = await _repo.getFarmlandCateData(
+        AppUrl.sub_sub_category(cateID, subCateID, hostId),
+      );
+
+      farmLandSubcate.value = ApiResponse.completed(response);
+    } catch (e) {
+      farmLandSubcate.value = ApiResponse.error(e.toString());
+
+      AppUtils.instance.snackBar("Error", e.toString(), true);
+    }
   }
 }
