@@ -40,8 +40,8 @@ class _ProductDetailsPageWidgetState extends State<ProductDetailsPageWidget> {
   @override
   void initState() {
     super.initState();
-    controller.fetchHostData(context, widget.hostId); // 🔴 pass real hostId
-    controller.fetcAnimatesData(context, widget.cattId, widget.subCatId, widget.hostId, widget.locationId) ; // 🔴 pass real hostId
+    controller.fetchHostData(context, widget.hostId); 
+    controller.fetcAnimatesData(context, widget.cattId, widget.subCatId, widget.hostId, widget.locationId) ; 
   }
 
   @override
@@ -115,7 +115,7 @@ class _ProductDetailsPageWidgetState extends State<ProductDetailsPageWidget> {
             onPageChanged: (index) =>
                 setState(() => _currentIndex = index),
             itemBuilder: (_, index) => Image.asset(
-              images[index]!,
+              images[index],
               fit: BoxFit.cover,
               width: double.infinity,
             ),
