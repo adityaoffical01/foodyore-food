@@ -12,6 +12,10 @@ class AppUrl {
   static const String getHostDecyUrls = '$baseSlugUrl/products/host-descriptions/';
   static const String getAmenitiesyUrls = '$baseSlugUrl/products/amenities?';
 
+
+  // check date 
+  static const String checkavailabilityMaster = '$baseSlugUrl/host/availability-masters?';
+
   // for products
   static const String categroryUrls = '$baseSlugUrl/products/categories';
   // for sub categroy
