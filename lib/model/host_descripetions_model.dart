@@ -1,58 +1,65 @@
-
 class HostDescripetionsModel {
   bool? success;
-  Data? data;
+  FarmLandCateData? data;
 
   HostDescripetionsModel({this.success, this.data});
 
   HostDescripetionsModel.fromJson(Map<String, dynamic> json) {
-    if(json["success"] is bool) {
+    if (json["success"] is bool) {
       success = json["success"];
     }
-    if(json["data"] is Map) {
-      data = json["data"] == null ? null : Data.fromJson(json["data"]);
+    if (json["data"] is Map) {
+      data = json["data"] == null
+          ? null
+          : FarmLandCateData.fromJson(json["data"]);
     }
   }
 
-  static List<HostDescripetionsModel> fromList(List<Map<String, dynamic>> list) {
+  static List<HostDescripetionsModel> fromList(
+    List<Map<String, dynamic>> list,
+  ) {
     return list.map(HostDescripetionsModel.fromJson).toList();
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> _data = <String, dynamic>{};
     _data["success"] = success;
-    if(data != null) {
+    if (data != null) {
       _data["data"] = data?.toJson();
     }
     return _data;
   }
 }
 
-class Data {
+class FarmLandCateData {
   HostDescription? hostDescription;
   Location? location;
 
-  Data({this.hostDescription, this.location});
+  FarmLandCateData({this.hostDescription, this.location});
 
-  Data.fromJson(Map<String, dynamic> json) {
-    if(json["hostDescription"] is Map) {
-      hostDescription = json["hostDescription"] == null ? null : HostDescription.fromJson(json["hostDescription"]);
+  FarmLandCateData.fromJson(Map<String, dynamic> json) {
+    if (json["hostDescription"] is Map) {
+      hostDescription = json["hostDescription"] == null
+          ? null
+          : HostDescription.fromJson(json["hostDescription"]);
     }
-    if(json["location"] is Map) {
-      location = json["location"] == null ? null : Location.fromJson(json["location"]);
+    if (json["location"] is Map) {
+      location = json["location"] == null
+          ? null
+          : Location.fromJson(json["location"]);
     }
   }
 
-  static List<Data> fromList(List<Map<String, dynamic>> list) {
-    return list.map(Data.fromJson).toList();
+  static List<FarmLandCateData> fromList(List<Map<String, dynamic>> list) {
+    return list.map(FarmLandCateData.fromJson).toList();
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> _data = <String, dynamic>{};
-    if(hostDescription != null) {
+    if (hostDescription != null) {
       _data["hostDescription"] = hostDescription?.toJson();
     }
-    if(location != null) {
+    if (location != null) {
       _data["location"] = location?.toJson();
     }
     return _data;
@@ -66,7 +73,7 @@ class Location {
   String? categoryName;
   String? subCategoryId;
   String? subCategoryName;
-  int? titleId;
+  dynamic titleId;
   String? address1;
   String? address2;
   String? cityName;
@@ -80,64 +87,84 @@ class Location {
   String? modifyBy;
   String? modifyOn;
 
-  Location({this.locationId, this.hostId, this.categoryId, this.categoryName, this.subCategoryId, this.subCategoryName, this.titleId, this.address1, this.address2, this.cityName, this.stateName, this.countryName, this.pinCode, this.latitude, this.longitude, this.createdBy, this.createdOn, this.modifyBy, this.modifyOn});
+  Location({
+    this.locationId,
+    this.hostId,
+    this.categoryId,
+    this.categoryName,
+    this.subCategoryId,
+    this.subCategoryName,
+    this.titleId,
+    this.address1,
+    this.address2,
+    this.cityName,
+    this.stateName,
+    this.countryName,
+    this.pinCode,
+    this.latitude,
+    this.longitude,
+    this.createdBy,
+    this.createdOn,
+    this.modifyBy,
+    this.modifyOn,
+  });
 
   Location.fromJson(Map<String, dynamic> json) {
-    if(json["LocationID"] is String) {
+    if (json["LocationID"] is String) {
       locationId = json["LocationID"];
     }
-    if(json["HostID"] is String) {
+    if (json["HostID"] is String) {
       hostId = json["HostID"];
     }
-    if(json["CategoryID"] is String) {
+    if (json["CategoryID"] is String) {
       categoryId = json["CategoryID"];
     }
-    if(json["CategoryName"] is String) {
+    if (json["CategoryName"] is String) {
       categoryName = json["CategoryName"];
     }
-    if(json["SubCategoryID"] is String) {
+    if (json["SubCategoryID"] is String) {
       subCategoryId = json["SubCategoryID"];
     }
-    if(json["SubCategoryName"] is String) {
+    if (json["SubCategoryName"] is String) {
       subCategoryName = json["SubCategoryName"];
     }
-    if(json["TitleID"] is int) {
+    if (json["TitleID"] is int) {
       titleId = json["TitleID"];
     }
-    if(json["Address1"] is String) {
+    if (json["Address1"] is String) {
       address1 = json["Address1"];
     }
-    if(json["Address2"] is String) {
+    if (json["Address2"] is String) {
       address2 = json["Address2"];
     }
-    if(json["CityName"] is String) {
+    if (json["CityName"] is String) {
       cityName = json["CityName"];
     }
-    if(json["StateName"] is String) {
+    if (json["StateName"] is String) {
       stateName = json["StateName"];
     }
-    if(json["CountryName"] is String) {
+    if (json["CountryName"] is String) {
       countryName = json["CountryName"];
     }
-    if(json["PinCode"] is String) {
+    if (json["PinCode"] is String) {
       pinCode = json["PinCode"];
     }
-    if(json["Latitude"] is String) {
+    if (json["Latitude"] is String) {
       latitude = json["Latitude"];
     }
-    if(json["Longitude"] is String) {
+    if (json["Longitude"] is String) {
       longitude = json["Longitude"];
     }
-    if(json["CreatedBy"] is String) {
+    if (json["CreatedBy"] is String) {
       createdBy = json["CreatedBy"];
     }
-    if(json["CreatedOn"] is String) {
+    if (json["CreatedOn"] is String) {
       createdOn = json["CreatedOn"];
     }
-    if(json["ModifyBy"] is String) {
+    if (json["ModifyBy"] is String) {
       modifyBy = json["ModifyBy"];
     }
-    if(json["ModifyOn"] is String) {
+    if (json["ModifyOn"] is String) {
       modifyOn = json["ModifyOn"];
     }
   }
@@ -182,8 +209,8 @@ class HostDescription {
   String? fileUpload2;
   String? fileUpload3;
   String? fileUpload4;
-  int? locationId;
-  int? titleId;
+  dynamic locationId;
+  dynamic titleId;
   String? createdBy;
   String? createdOn;
   String? modifyBy;
@@ -197,84 +224,156 @@ class HostDescription {
   String? hostEmail;
   String? hostMobile;
   String? hostAddress;
+  //
+  String? hostLocationId;
+  String? address1;
+  String? address2;
+  String? cityName;
+  String? stateName;
+  String? countryName;
+  String? pinCode;
+  String? latitude;
+  String? longitude;
 
-  HostDescription({this.descriptionId, this.categoryId, this.subCategoryId, this.hostId, this.descriptionTitle, this.description, this.fileUpload1, this.fileUpload2, this.fileUpload3, this.fileUpload4, this.locationId, this.titleId, this.createdBy, this.createdOn, this.modifyBy, this.modifyOn, this.categoryName, this.categoryStatus, this.isCategoryLocationWise, this.subCategoryName, this.subCategoryStatus, this.hostName, this.hostEmail, this.hostMobile, this.hostAddress});
+  HostDescription({
+    this.descriptionId,
+    this.categoryId,
+    this.subCategoryId,
+    this.hostId,
+    this.descriptionTitle,
+    this.description,
+    this.fileUpload1,
+    this.fileUpload2,
+    this.fileUpload3,
+    this.fileUpload4,
+    this.locationId,
+    this.titleId,
+    this.createdBy,
+    this.createdOn,
+    this.modifyBy,
+    this.modifyOn,
+    this.categoryName,
+    this.categoryStatus,
+    this.isCategoryLocationWise,
+    this.subCategoryName,
+    this.subCategoryStatus,
+    this.hostName,
+    this.hostEmail,
+    this.hostMobile,
+    this.hostAddress,
+    this.hostLocationId,
+    this.address1,
+    this.address2,
+    this.cityName,
+    this.stateName,
+    this.countryName,
+    this.pinCode,
+    this.latitude,
+    this.longitude,
+  });
 
   HostDescription.fromJson(Map<String, dynamic> json) {
-    if(json["DescriptionID"] is String) {
+    if (json["DescriptionID"] is String) {
       descriptionId = json["DescriptionID"];
     }
-    if(json["CategoryID"] is String) {
+    if (json["CategoryID"] is String) {
       categoryId = json["CategoryID"];
     }
-    if(json["SubCategoryID"] is String) {
+    if (json["SubCategoryID"] is String) {
       subCategoryId = json["SubCategoryID"];
     }
-    if(json["HostID"] is String) {
+    if (json["HostID"] is String) {
       hostId = json["HostID"];
     }
-    if(json["DescriptionTitle"] is String) {
+    if (json["DescriptionTitle"] is String) {
       descriptionTitle = json["DescriptionTitle"];
     }
-    if(json["Description"] is String) {
+    if (json["Description"] is String) {
       description = json["Description"];
     }
-    if(json["FileUpload1"] is String) {
+    if (json["FileUpload1"] is String) {
       fileUpload1 = json["FileUpload1"];
     }
-    if(json["FileUpload2"] is String) {
+    if (json["FileUpload2"] is String) {
       fileUpload2 = json["FileUpload2"];
     }
-    if(json["FileUpload3"] is String) {
+    if (json["FileUpload3"] is String) {
       fileUpload3 = json["FileUpload3"];
     }
-    if(json["FileUpload4"] is String) {
+    if (json["FileUpload4"] is String) {
       fileUpload4 = json["FileUpload4"];
     }
-    if(json["LocationID"] is int) {
+    if (json["LocationID"] is int) {
       locationId = json["LocationID"];
     }
-    if(json["TitleID"] is int) {
+    if (json["TitleID"] is int) {
       titleId = json["TitleID"];
     }
-    if(json["CreatedBy"] is String) {
+    if (json["CreatedBy"] is String) {
       createdBy = json["CreatedBy"];
     }
-    if(json["CreatedOn"] is String) {
+    if (json["CreatedOn"] is String) {
       createdOn = json["CreatedOn"];
     }
-    if(json["ModifyBy"] is String) {
+    if (json["ModifyBy"] is String) {
       modifyBy = json["ModifyBy"];
     }
-    if(json["ModifyOn"] is String) {
+    if (json["ModifyOn"] is String) {
       modifyOn = json["ModifyOn"];
     }
-    if(json["CategoryName"] is String) {
+    if (json["CategoryName"] is String) {
       categoryName = json["CategoryName"];
     }
-    if(json["CategoryStatus"] is String) {
+    if (json["CategoryStatus"] is String) {
       categoryStatus = json["CategoryStatus"];
     }
-    if(json["IsCategoryLocationWise"] is bool) {
+    if (json["IsCategoryLocationWise"] is bool) {
       isCategoryLocationWise = json["IsCategoryLocationWise"];
     }
-    if(json["SubCategoryName"] is String) {
+    if (json["SubCategoryName"] is String) {
       subCategoryName = json["SubCategoryName"];
     }
-    if(json["SubCategoryStatus"] is String) {
+    if (json["SubCategoryStatus"] is String) {
       subCategoryStatus = json["SubCategoryStatus"];
     }
-    if(json["HostName"] is String) {
+    if (json["HostName"] is String) {
       hostName = json["HostName"];
     }
-    if(json["HostEmail"] is String) {
+    if (json["HostEmail"] is String) {
       hostEmail = json["HostEmail"];
     }
-    if(json["HostMobile"] is String) {
+    if (json["HostMobile"] is String) {
       hostMobile = json["HostMobile"];
     }
-    if(json["HostAddress"] is String) {
+    if (json["HostAddress"] is String) {
       hostAddress = json["HostAddress"];
+    }
+    if (json["HostLocationID"] is String) {
+      hostLocationId = json["HostLocationID"];
+    }
+    if (json["Address1"] is String) {
+      address1 = json["Address1"];
+    }
+    if (json["Address2"] is String) {
+      address2 = json["Address2"];
+    }
+    if (json["CityName"] is String) {
+      cityName = json["CityName"];
+    }
+    if (json["StateName"] is String) {
+      stateName = json["StateName"];
+    }
+    if (json["CountryName"] is String) {
+      countryName = json["CountryName"];
+    }
+    if (json["PinCode"] is String) {
+      pinCode = json["PinCode"];
+    }
+    if (json["Latitude"] is String) {
+      latitude = json["Latitude"];
+    }
+    if (json["Longitude"] is String) {
+      longitude = json["Longitude"];
     }
   }
 
@@ -317,6 +416,15 @@ class HostDescription {
     _data["HostEmail"] = hostEmail;
     _data["HostMobile"] = hostMobile;
     _data["HostAddress"] = hostAddress;
+    _data["HostLocationID"] = hostLocationId;
+    _data["Address1"] = address1;
+    _data["Address2"] = address2;
+    _data["CityName"] = cityName;
+    _data["StateName"] = stateName;
+    _data["CountryName"] = countryName;
+    _data["PinCode"] = pinCode;
+    _data["Latitude"] = latitude;
+    _data["Longitude"] = longitude;
     return _data;
   }
 }

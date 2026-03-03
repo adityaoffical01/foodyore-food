@@ -22,6 +22,9 @@ class ChooseDestinationWidget extends StatefulWidget {
 
 class _ChooseDestinationWidgetState extends State<ChooseDestinationWidget> {
   final CategoryController _categoryController = Get.find<CategoryController>();
+  // final CategoryController _categoryController = Get.put(
+  //   HostDescriptionsControlller(),
+  // );
 
   @override
   void initState() {
@@ -29,10 +32,10 @@ class _ChooseDestinationWidgetState extends State<ChooseDestinationWidget> {
     final subCategoryId = widget.subCategoryItem.subCategoryID ?? '';
     if (subCategoryId.isNotEmpty) {
       _categoryController.fetchFarmlandSubCate(
-        context,
-        widget.subCategoryItem.categoryID ?? '',
-        subCategoryId,
-        widget.subCategoryItem.hostID ?? '',
+        context: context,
+        subCateID: subCategoryId,
+        cateID: widget.subCategoryItem.categoryID ?? '',
+        hostId: widget.subCategoryItem.hostID ?? '',
       );
     }
   }
@@ -58,10 +61,10 @@ class _ChooseDestinationWidgetState extends State<ChooseDestinationWidget> {
 
             return RefreshIndicator(
               onRefresh: () => _categoryController.fetchFarmlandSubCate(
-                context,
-                widget.subCategoryItem.categoryID ?? '',
-                widget.subCategoryItem.subCategoryID ?? '',
-                widget.subCategoryItem.hostID ?? '',
+                context: context,
+                subCateID: widget.subCategoryItem.subCategoryID ?? '',
+                cateID: widget.subCategoryItem.categoryID ?? '',
+                hostId: widget.subCategoryItem.hostID ?? '',
               ),
               child: SingleChildScrollView(
                 physics: AlwaysScrollableScrollPhysics(),
@@ -95,16 +98,27 @@ class _ChooseDestinationWidgetState extends State<ChooseDestinationWidget> {
                       return SizedBox(
                         width: itemWidth,
                         child: GestureDetector(
-                          onTap: () => Get.to(
-                            ProductDetailsPageWidget(
-                              cattId: item.categoryID.toString(),
-                              hostId: item.hostID.toString(),
-                              subCatId: item.subCategoryID.toString(),
-                              locationId: '',
-                            ),
-                          ),
+                          onTap: () async {
+                            bool success = await _categoryController
+                                .fetchDescriptionData(
+                                  context,
+                                  item.descriptionId ?? '',
+                                );
+
+                            if (success) {
+                              Get.to(
+                                ProductDetailsPageWidget(
+                                  hostId: item.hostId ?? '',
+                                  cattId: item.categoryId ?? '',
+                                  subCatId: item.subCategoryId ?? "",
+
+                                  descriptionId: item.descriptionId ?? '',
+                                ),
+                              );
+                            }
+                          },
                           child: categoryCard(
-                            title: item.titleName,
+                            title: item.descriptionTitle ?? '',
                             host: '',
                             location: locationText,
                             buttonText: "View Details",

@@ -1,4 +1,6 @@
 
+import 'package:foodyore/model/sub_cate_model.dart';
+
 class AmenitiesListModel {
   bool? success;
   List<AmenitiesData>? amenitiesData;
@@ -35,40 +37,6 @@ class AmenitiesListModel {
   }
 }
 
-class Pagination {
-  int? limit;
-  bool? hasMore;
-  dynamic nextCursor;
-  int? count;
-
-  Pagination({this.limit, this.hasMore, this.nextCursor, this.count});
-
-  Pagination.fromJson(Map<String, dynamic> json) {
-    if(json["limit"] is int) {
-      limit = json["limit"];
-    }
-    if(json["hasMore"] is bool) {
-      hasMore = json["hasMore"];
-    }
-    nextCursor = json["nextCursor"];
-    if(json["count"] is int) {
-      count = json["count"];
-    }
-  }
-
-  static List<Pagination> fromList(List<Map<String, dynamic>> list) {
-    return list.map(Pagination.fromJson).toList();
-  }
-
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> _data = <String, dynamic>{};
-    _data["limit"] = limit;
-    _data["hasMore"] = hasMore;
-    _data["nextCursor"] = nextCursor;
-    _data["count"] = count;
-    return _data;
-  }
-}
 
 class AmenitiesData {
   String? amenitieId;

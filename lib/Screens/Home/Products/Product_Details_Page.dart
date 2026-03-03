@@ -1,36 +1,34 @@
-// ignore_for_file: deprecated_member_use, unnecessary_null_comparison
+// ignore_for_file: deprecated_member_use
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:foodyore/controller/host_descriptions_controlller.dart';
-import 'package:foodyore/data/response/api_status.dart';
-import 'package:foodyore/model/amenities_list_model.dart';
-import 'package:foodyore/res/app_urls.dart';
-import 'package:foodyore/utils/helpers/Custom/Custom_Loder.dart';
+import 'package:foodyore/controller/Menu_Controller.dart';
+import 'package:foodyore/controller/category_controller.dart';
+import 'package:foodyore/utils/styles/Text_Styles.dart';
 import 'package:get/get.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
-
-import 'package:foodyore/model/host_descripetions_model.dart';
-
-import 'package:foodyore/Screens/Home/Menu/Menu_Item_Widget.dart';
-import 'package:foodyore/utils/helpers/App_Content.dart';
+import 'package:foodyore/data/response/api_status.dart';
+import 'package:foodyore/model/PDP_model.dart';
+import 'package:foodyore/model/amenities_list_model.dart';
+import 'package:foodyore/res/app_urls.dart';
 import 'package:foodyore/utils/Colors/AppColors.dart';
+import 'package:foodyore/utils/helpers/Custom/Custom_Loder.dart';
 import 'package:foodyore/utils/helpers/Custom/Custom_butoons.dart';
 import 'package:foodyore/utils/helpers/Custom/Custom_screen_background.dart';
 import 'package:foodyore/utils/styles/Custom_circular_button.dart';
-import 'package:foodyore/utils/styles/Text_Styles.dart';
 
 class ProductDetailsPageWidget extends StatefulWidget {
   final String hostId;
   final String cattId;
   final String subCatId;
-  final String locationId;
+  final String descriptionId;
+
   const ProductDetailsPageWidget({
     Key? key,
     required this.hostId,
     required this.cattId,
     required this.subCatId,
-    required this.locationId,
+    required this.descriptionId,
   }) : super(key: key);
 
   @override
@@ -42,20 +40,20 @@ class _ProductDetailsPageWidgetState extends State<ProductDetailsPageWidget> {
   final PageController _pageController = PageController();
   int _currentIndex = 0;
 
-  final HostDescriptionsControlller controller = Get.put(
-    HostDescriptionsControlller(),
-  );
+  final CategoryController controller = Get.find<CategoryController>();
+  final MenuItemController menuController = Get.find<MenuItemController>();
 
   @override
   void initState() {
     super.initState();
-    controller.fetchHostData(context, widget.hostId); // 🔴 pass real hostId
-    controller.fetcAnimatesData(
-      context,
-      widget.cattId,
-      widget.subCatId,
-      widget.hostId,
-      widget.locationId,
+
+    controller.fetchDescriptionData(context, widget.descriptionId);
+
+    controller.fetchAmenitiesData(
+      context: context,
+      catId: widget.cattId,
+      subCatId: widget.subCatId,
+      hostId: widget.hostId,
     );
   }
 
@@ -67,7 +65,7 @@ class _ProductDetailsPageWidgetState extends State<ProductDetailsPageWidget> {
 
   String _resolveImagePath(String rawPath) {
     final path = rawPath.trim().replaceAll('\\', '/');
-    if (path.startsWith('http://') || path.startsWith('https://')) return path;
+    if (path.startsWith('http')) return path;
     if (path.startsWith('assets/')) return path;
     if (path.startsWith('/')) return '${AppUrl.imageUrl}$path';
     return '${AppUrl.imageUrl}/$path';
@@ -79,48 +77,34 @@ class _ProductDetailsPageWidgetState extends State<ProductDetailsPageWidget> {
       backgroundColor: AppColors.backgroundColor,
       body: CustomBackground(
         child: Obx(() {
-          if (controller.rxRequestStatus.value == Status.LOADING) {
+          if (controller.pdpStatus.value == Status.LOADING) {
             return const Center(
               child: CustomLoder(color: AppColors.primaryColor),
             );
           }
 
-          if (controller.rxRequestStatus.value == Status.ERROR) {
-            return Center(
-              child: Text(
-                controller.error.value,
-                style: AppTextStyles.bodySmall,
-              ),
-            );
+          if (controller.pdpStatus.value == Status.ERROR) {
+            return const Center(child: Text("Something went wrong"));
           }
 
-          final Data? data = controller.hostDescripetionsModel.value.data?.data;
-
-          if (data == null) {
-            return const Center(child: Text("No data found"));
-          }
+          final PdpCommonModel data = controller.pdpData.value;
 
           return SingleChildScrollView(
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
               children: [_buildImageSlider(data), _buildContentSection(data)],
             ),
           );
         }),
       ),
-      bottomSheet: Container(
-        color: AppColors.backgroundColor,
-        child: _buildBottomButton(),
-      ),
+      bottomSheet: _buildBottomButton(),
     );
   }
 
-  /* ---------------------------- IMAGE SLIDER ---------------------------- */
+  /* ---------------- IMAGE SLIDER ---------------- */
 
-  Widget _buildImageSlider(Data data) {
-    final List<String> images = data.hostDescription?.imageUploads ?? [];
-    final List<String> sliderImages = images.isNotEmpty
-        ? images
+  Widget _buildImageSlider(PdpCommonModel data) {
+    final sliderImages = data.images.isNotEmpty
+        ? data.images
         : ['assets/images/formland.jpg'];
 
     return Stack(
@@ -131,41 +115,25 @@ class _ProductDetailsPageWidgetState extends State<ProductDetailsPageWidget> {
           child: PageView.builder(
             controller: _pageController,
             itemCount: sliderImages.length,
-            onPageChanged: (index) => setState(() => _currentIndex = index),
+            onPageChanged: (i) => setState(() => _currentIndex = i),
             itemBuilder: (_, index) {
               final imagePath = _resolveImagePath(sliderImages[index]);
-              final isAssetImage = imagePath.startsWith('assets/');
 
-              if (isAssetImage) {
-                return Image.asset(
-                  imagePath,
-                  fit: BoxFit.cover,
-                  width: double.infinity,
-                );
+              if (imagePath.startsWith('assets/')) {
+                return Image.asset(imagePath, fit: BoxFit.cover);
               }
 
               return Image.network(
                 imagePath,
                 fit: BoxFit.cover,
-                width: double.infinity,
                 errorBuilder: (_, __, ___) => Container(
-                  height: 260,
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    color: AppColors.textHintColor.withAlpha(40),
-                  ),
-                  child: Icon(
-                    Iconsax.image,
-                    size: 50,
-                    color: AppColors.primaryColor,
-                  ),
+                  color: AppColors.textHintColor.withAlpha(40),
+                  child: const Icon(Iconsax.image),
                 ),
               );
             },
           ),
         ),
-
-        /// Indicator
         Positioned(
           bottom: 12,
           left: 0,
@@ -189,21 +157,12 @@ class _ProductDetailsPageWidgetState extends State<ProductDetailsPageWidget> {
             ),
           ),
         ),
-
-        /// Top Buttons
         Positioned(
           top: 60,
           left: 10,
-          right: 10,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              _circleButton(
-                icon: CupertinoIcons.chevron_back,
-                onTap: () => Get.back(),
-              ),
-              _circleButton(icon: Iconsax.whatsapp_copy),
-            ],
+          child: _circleButton(
+            icon: CupertinoIcons.chevron_back,
+            onTap: () => Get.back(),
           ),
         ),
       ],
@@ -215,39 +174,33 @@ class _ProductDetailsPageWidgetState extends State<ProductDetailsPageWidget> {
       onTap: onTap,
       child: CustomCircularButton(
         color: AppColors.white,
-        icon: Icon(icon, color: AppColors.black, size: 20),
+        icon: Icon(icon, color: AppColors.black),
       ),
     );
   }
 
-  /* ---------------------------- CONTENT ---------------------------- */
+  /* ---------------- CONTENT ---------------- */
 
-  Widget _buildContentSection(Data data) {
-    final host = data.hostDescription;
-    final location = data.location;
-
+  Widget _buildContentSection(PdpCommonModel data) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+      padding: const EdgeInsets.all(20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildBreadcrumbs(data),
           const SizedBox(height: 8),
 
-          Text(host?.descriptionTitle ?? '', style: AppTextStyles.headingSmall),
-          const SizedBox(height: 5),
+          Text(data.title ?? '', style: AppTextStyles.headingSmall),
+          const SizedBox(height: 8),
 
           _sectionTitle('About the Experience'),
-          _paragraph(host?.description ?? ''),
-
-          const SizedBox(height: 10),
-          _sectionTitle('Location'),
-          _buildMapSection(location),
-
-          // const SizedBox(height: 60),
+          _paragraph(data.description ?? ''),
           const SizedBox(height: 12),
-          _sectionTitle('What to Expect'),
-          const SizedBox(height: 10),
+
+          _sectionTitle('Where we are'),
+          _buildMapSection(data),
+          const SizedBox(height: 12),
+
           _expectationSection(),
           const SizedBox(height: 80),
         ],
@@ -255,130 +208,21 @@ class _ProductDetailsPageWidgetState extends State<ProductDetailsPageWidget> {
     );
   }
 
-  Widget _expectationSection() {
-    return Obx(() {
-      if (controller.animatesListModel.value.status == Status.LOADING) {
-        return const SizedBox(
-          height: 100,
-          child: Center(child: CircularProgressIndicator()),
-        );
-      }
-
-      final amenities =
-          controller.animatesListModel.value.data?.amenitiesData ?? [];
-
-      if (amenities.isEmpty) {
-        return const SizedBox(); // UI clean
-      }
-
-      return Wrap(
-        spacing: 12,
-        runSpacing: 12,
-        children: amenities.map((item) {
-          return _expectationCard(item);
-        }).toList(),
-      );
-    });
-  }
-
-  Widget _expectationCard(AmenitiesData item) {
-    return Stack(
-      children: [
-        ClipRRect(
-          borderRadius: BorderRadius.circular(20),
-          child: Image.network(
-            item.amenitieImage ?? '',
-            width: 160,
-            height: 100,
-            fit: BoxFit.cover,
-            errorBuilder: (_, __, ___) => Image.asset(
-              'assets/images/fire.jpg',
-              width: 160,
-              height: 100,
-              fit: BoxFit.cover,
-            ),
-          ),
-        ),
-        Positioned(
-          bottom: 6,
-          left: 15,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                item.amenitieType ?? '',
-                style: AppTextStyles.bodySmall.copyWith(
-                  color: AppColors.white,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              Text(
-                '₹${item.price ?? 0} ${item.unit ?? ''}',
-                style: AppTextStyles.bodySmall.copyWith(color: AppColors.white),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildBreadcrumbs(Data data) {
+  Widget _buildBreadcrumbs(PdpCommonModel data) {
     return Row(
       children: [
-        _breadcrumbText(data.location?.categoryName ?? ''),
+        _breadcrumbText(data.categoryName ?? ''),
         _dot(),
-        _breadcrumbText(data.location?.subCategoryName ?? ''),
+        _breadcrumbText(data.subCategoryName ?? ''),
         _dot(),
-        Expanded(
-          child: _breadcrumbText(
-            data.hostDescription?.descriptionTitle ?? '',
-            bold: true,
-          ),
-        ),
+        Expanded(child: _breadcrumbText(data.title ?? '', bold: true)),
       ],
     );
   }
 
-  Widget _breadcrumbText(String text, {bool bold = false}) {
-    return Text(
-      text,
-      overflow: TextOverflow.ellipsis,
-      maxLines: 1,
-      style: AppTextStyles.caption.copyWith(
-        color: AppColors.black,
-        fontWeight: bold ? FontWeight.bold : FontWeight.normal,
-      ),
-    );
-  }
-
-  Widget _dot() => const Padding(
-    padding: EdgeInsets.symmetric(horizontal: 4),
-    child: Icon(Icons.circle, size: 6),
-  );
-
-  Widget _sectionTitle(String title) {
-    return Text(
-      title.toUpperCase(),
-      style: AppTextStyles.caption.copyWith(
-        color: AppColors.primaryColor,
-        fontWeight: FontWeight.bold,
-        fontFamily: AppFonts.primaryFont,
-      ),
-    );
-  }
-
-  Widget _paragraph(String text) {
-    return Text(
-      text,
-      style: AppTextStyles.caption.copyWith(color: AppColors.black),
-    );
-  }
-
-  Widget _buildMapSection(Location? location) {
+  Widget _buildMapSection(PdpCommonModel data) {
     return Column(
       children: [
-        const SizedBox(height: 5),
         ClipRRect(
           borderRadius: BorderRadius.circular(20),
           child: Image.asset(
@@ -393,13 +237,10 @@ class _ProductDetailsPageWidgetState extends State<ProductDetailsPageWidget> {
           children: [
             Expanded(
               child: Text(
-                "${location?.address1 ?? ''}, "
-                "${location?.cityName ?? ''}, "
-                "${location?.stateName ?? ''}",
-                maxLines: 2,
+                "${data.address ?? ''}, ${data.city ?? ''}, ${data.state ?? ''}",
                 style: AppTextStyles.bodySmall.copyWith(
-                  color: AppColors.black,
-                  fontWeight: FontWeight.bold,
+                  fontWeight: FontWeight.w500,
+                  color: AppColors.textPrimary,
                 ),
               ),
             ),
@@ -427,7 +268,165 @@ class _ProductDetailsPageWidgetState extends State<ProductDetailsPageWidget> {
     );
   }
 
-  /* ---------------------------- BOTTOM BUTTON ---------------------------- */
+  Widget _expectationSection() {
+    return Obx(() {
+      if (controller.amenitiesData.value.status == Status.LOADING) {
+        return const SizedBox(
+          height: 100,
+          child: Center(child: CustomLoder(color: AppColors.primaryColor)),
+        );
+      }
+
+      final amenities =
+          controller.amenitiesData.value.data?.amenitiesData ?? [];
+
+      if (amenities.isEmpty) {
+        return const SizedBox();
+      }
+
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _sectionTitle('What to Expect'),
+          const SizedBox(height: 10),
+          SizedBox(
+            height: 100,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              itemCount: amenities.length,
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+              separatorBuilder: (_, __) => const SizedBox(width: 12),
+              itemBuilder: (context, index) {
+                return _expectationCard(amenities[index]);
+              },
+            ),
+          ),
+        ],
+      );
+    });
+  }
+
+  Widget _expectationCard(AmenitiesData item) {
+    return Container(
+      width: 170,
+      height: 100,
+      decoration: BoxDecoration(borderRadius: BorderRadius.circular(20)),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(12),
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            /// IMAGE
+            Image.network(
+              item.amenitieImage ?? '',
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) {
+                return Container(
+                  color: AppColors.textHintColor.withAlpha(20),
+                  child: const Icon(Iconsax.image),
+                );
+              },
+            ),
+
+            /// DARK GRADIENT OVERLAY
+            Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.bottomCenter,
+                  end: Alignment.topCenter,
+                  colors: [Colors.black.withOpacity(0.5), Colors.transparent],
+                ),
+              ),
+            ),
+
+            /// TEXT CONTENT
+            Positioned(
+              left: 12,
+              bottom: 12,
+              right: 12,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    item.amenitieType ?? '',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      height: 1.4,
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+
+                  RichText(
+                    text: TextSpan(
+                      style: const TextStyle(
+                        height: 1.4,
+                        color: Colors.white70,
+                        fontSize: 12,
+                      ),
+                      children: [
+                        TextSpan(
+                          text: '₹${item.price ?? 0} ',
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                        const TextSpan(
+                          text: 'per hour',
+                          style: TextStyle(
+                            fontWeight: FontWeight.normal,
+                            color: Colors.white70,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _sectionTitle(String title) {
+    return Text(
+      title.toUpperCase(),
+      style: AppTextStyles.caption.copyWith(
+        color: AppColors.primaryColor,
+        fontWeight: FontWeight.bold,
+      ),
+    );
+  }
+
+  Widget _paragraph(String text) {
+    return Text(
+      text,
+      style: AppTextStyles.caption.copyWith(color: AppColors.textPrimary),
+    );
+  }
+
+  Widget _breadcrumbText(String text, {bool bold = false}) {
+    return Text(
+      text,
+      overflow: TextOverflow.ellipsis,
+      style: AppTextStyles.caption.copyWith(
+        color: AppColors.textPrimary,
+        fontWeight: bold ? FontWeight.bold : FontWeight.normal,
+      ),
+    );
+  }
+
+  Widget _dot() => const Padding(
+    padding: EdgeInsets.symmetric(horizontal: 4),
+    child: Icon(Icons.circle, size: 6),
+  );
+
+  /* ---------------- BOTTOM BUTTON ---------------- */
 
   Widget _buildBottomButton() {
     return CustomButton(
@@ -436,135 +435,15 @@ class _ProductDetailsPageWidgetState extends State<ProductDetailsPageWidget> {
       horizontal: 30,
       title: 'Book Now',
       color: AppColors.primaryColor,
-      onPressed: _openBookingBottomSheet,
-    );
-  }
-
-  void _openBookingBottomSheet() {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: AppColors.backgroundColor,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      builder: (context) {
-        return _BookingBottomSheet();
+      onPressed: () {
+        menuController.fetchAllMenuItems(
+          context: context,
+          categoryId: widget.cattId,
+          subCategoryId: widget.subCatId,
+          hostId: widget.hostId,
+          locationId: controller.pdpData.value.locationId ?? '',
+        );
       },
-    );
-  }
-}
-
-/* ---------------------------- BOOKING SHEET (UNCHANGED) ---------------------------- */
-
-class _BookingBottomSheet extends StatefulWidget {
-  @override
-  State<_BookingBottomSheet> createState() => _BookingBottomSheetState();
-}
-
-class _BookingBottomSheetState extends State<_BookingBottomSheet> {
-  DateTime? selectedDate;
-  TimeOfDay? selectedTime;
-
-  Future<void> _pickDate() async {
-    final date = await showDatePicker(
-      context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime.now(),
-      lastDate: DateTime.now().add(const Duration(days: 60)),
-    );
-    if (date != null) setState(() => selectedDate = date);
-  }
-
-  Future<void> _pickTime() async {
-    final time = await showTimePicker(
-      context: context,
-      initialTime: TimeOfDay.now(),
-    );
-    if (time != null) setState(() => selectedTime = time);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.only(
-        left: 20,
-        right: 20,
-        top: 20,
-        bottom: MediaQuery.of(context).viewInsets.bottom + 20,
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text('Select Date & Time', style: AppTextStyles.headingSmall),
-          Text(
-            'Choose a date and time to check availability and book',
-            style: AppTextStyles.caption,
-          ),
-          const SizedBox(height: 20),
-
-          _pickerTile(
-            title: selectedDate == null
-                ? 'Select Date'
-                : '${selectedDate!.day}/${selectedDate!.month}/${selectedDate!.year}',
-            icon: Iconsax.calendar_1_copy,
-            onTap: _pickDate,
-          ),
-          const SizedBox(height: 12),
-
-          _pickerTile(
-            title: selectedTime == null
-                ? 'Select Time'
-                : selectedTime!.format(context),
-            icon: Icons.access_time,
-            onTap: _pickTime,
-          ),
-          const SizedBox(height: 24),
-
-          CustomButton(
-            title: 'Confirm Booking',
-            color: AppColors.primaryColor,
-            horizontal: 0,
-            onPressed: () {
-              print(selectedDate);
-              print(selectedTime);
-              if (selectedDate == null || selectedTime == null) {
-                showCustomSnackBar(
-                  message: 'Please select date and time',
-                  showAtTop: true,
-                );
-                return;
-              }
-              Get.to(MenuItemWidget());
-            },
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _pickerTile({
-    required String title,
-    required IconData icon,
-    required VoidCallback onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: AppColors.primaryColor),
-        ),
-        child: Row(
-          children: [
-            Icon(icon, color: AppColors.primaryColor),
-            const SizedBox(width: 12),
-            Text(title, style: AppTextStyles.bodyMedium),
-          ],
-        ),
-      ),
     );
   }
 }

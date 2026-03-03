@@ -9,7 +9,8 @@ class AppUrl {
   static String login_user(String user_id) => '$baseSlugUrl/users/$user_id';
   // for home
   static const String homeGalleryUrls = '$baseSlugUrl/home/gallery';
-  static const String getHostDecyUrls = '$baseSlugUrl/products/host-descriptions/';
+  static const String getHostDecyUrls =
+      '$baseSlugUrl/products/host-descriptions/';
   static const String getAmenitiesyUrls = '$baseSlugUrl/products/amenities?';
 
   // for products
@@ -24,5 +25,9 @@ class AppUrl {
 
   // for sub sub category
   static String sub_sub_category(String cate_id, sub_cate_id, host_id) =>
-      '$baseSlugUrl/products/farm-land-titles?subCategoryId=$sub_cate_id&categoryId=$cate_id&hostId=$host_id';
+      '$baseSlugUrl/products/host-descriptions?subCategoryId=$sub_cate_id&categoryId=$cate_id&hostId=$host_id';
+
+  // for menu Itesms
+  static String get_menu_urls(String cate_id, sub_cate_id, host_id, loca_id) =>
+      '$baseSlugUrl/products/menu/items?subCategoryId=$sub_cate_id&categoryId=$cate_id&hostId=$host_id&locationId=$loca_id';
 }
