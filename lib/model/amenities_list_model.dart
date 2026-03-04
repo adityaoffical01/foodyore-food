@@ -1,4 +1,3 @@
-
 import 'package:foodyore/model/sub_cate_model.dart';
 
 class AmenitiesListModel {
@@ -9,14 +8,20 @@ class AmenitiesListModel {
   AmenitiesListModel({this.success, this.amenitiesData, this.pagination});
 
   AmenitiesListModel.fromJson(Map<String, dynamic> json) {
-    if(json["success"] is bool) {
+    if (json["success"] is bool) {
       success = json["success"];
     }
-    if(json["data"] is List) {
-      amenitiesData = json["data"] == null ? null : (json["data"] as List).map((e) => AmenitiesData.fromJson(e)).toList();
+    if (json["data"] is List) {
+      amenitiesData = json["data"] == null
+          ? null
+          : (json["data"] as List)
+                .map((e) => AmenitiesData.fromJson(e))
+                .toList();
     }
-    if(json["pagination"] is Map) {
-      pagination = json["pagination"] == null ? null : Pagination.fromJson(json["pagination"]);
+    if (json["pagination"] is Map) {
+      pagination = json["pagination"] == null
+          ? null
+          : Pagination.fromJson(json["pagination"]);
     }
   }
 
@@ -27,16 +32,15 @@ class AmenitiesListModel {
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> _data = <String, dynamic>{};
     _data["success"] = success;
-    if(amenitiesData != null) {
+    if (amenitiesData != null) {
       _data["data"] = amenitiesData?.map((e) => e.toJson()).toList();
     }
-    if(pagination != null) {
+    if (pagination != null) {
       _data["pagination"] = pagination?.toJson();
     }
     return _data;
   }
 }
-
 
 class AmenitiesData {
   String? amenitieId;
@@ -54,49 +58,64 @@ class AmenitiesData {
   String? categoryName;
   String? subCategoryName;
 
-  AmenitiesData({this.amenitieId, this.amenitieType, this.price, this.amenitieImage, this.hostId, this.hostName, this.unit, this.locationId, this.categoryId, this.subCategoryId, this.createdOn, this.modifyOn, this.categoryName, this.subCategoryName});
+  AmenitiesData({
+    this.amenitieId,
+    this.amenitieType,
+    this.price,
+    this.amenitieImage,
+    this.hostId,
+    this.hostName,
+    this.unit,
+    this.locationId,
+    this.categoryId,
+    this.subCategoryId,
+    this.createdOn,
+    this.modifyOn,
+    this.categoryName,
+    this.subCategoryName,
+  });
 
   AmenitiesData.fromJson(Map<String, dynamic> json) {
-    if(json["AmenitieID"] is String) {
+    if (json["AmenitieID"] is String) {
       amenitieId = json["AmenitieID"];
     }
-    if(json["AmenitieType"] is String) {
+    if (json["AmenitieType"] is String) {
       amenitieType = json["AmenitieType"];
     }
-    if(json["Price"] is int) {
+    if (json["Price"] is int) {
       price = json["Price"];
     }
-    if(json["AmenitieImage"] is String) {
+    if (json["AmenitieImage"] is String) {
       amenitieImage = json["AmenitieImage"];
     }
-    if(json["HostID"] is String) {
+    if (json["HostID"] is String) {
       hostId = json["HostID"];
     }
-    if(json["HostName"] is String) {
+    if (json["HostName"] is String) {
       hostName = json["HostName"];
     }
-    if(json["Unit"] is String) {
+    if (json["Unit"] is String) {
       unit = json["Unit"];
     }
-    if(json["LocationID"] is String) {
+    if (json["LocationID"] is String) {
       locationId = json["LocationID"];
     }
-    if(json["CategoryID"] is String) {
+    if (json["CategoryID"] is String) {
       categoryId = json["CategoryID"];
     }
-    if(json["SubCategoryID"] is String) {
+    if (json["SubCategoryID"] is String) {
       subCategoryId = json["SubCategoryID"];
     }
-    if(json["CreatedOn"] is String) {
+    if (json["CreatedOn"] is String) {
       createdOn = json["CreatedOn"];
     }
-    if(json["ModifyOn"] is String) {
+    if (json["ModifyOn"] is String) {
       modifyOn = json["ModifyOn"];
     }
-    if(json["CategoryName"] is String) {
+    if (json["CategoryName"] is String) {
       categoryName = json["CategoryName"];
     }
-    if(json["SubCategoryName"] is String) {
+    if (json["SubCategoryName"] is String) {
       subCategoryName = json["SubCategoryName"];
     }
   }

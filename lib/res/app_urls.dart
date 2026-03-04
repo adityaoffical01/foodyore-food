@@ -30,4 +30,10 @@ class AppUrl {
   // for menu Itesms
   static String get_menu_urls(String cate_id, sub_cate_id, host_id, loca_id) =>
       '$baseSlugUrl/products/menu/items?subCategoryId=$sub_cate_id&categoryId=$cate_id&hostId=$host_id&locationId=$loca_id';
+
+  // for cart items
+  static const String cart_URL = '$baseSlugUrl/cart';
+
+  static String get_cart_urls(String userMachine) =>
+      '$baseSlugUrl/cart?userMachine=$userMachine';
 }

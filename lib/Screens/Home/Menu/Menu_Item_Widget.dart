@@ -1,78 +1,140 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:foodyore/Screens/Cart/cart_widget.dart';
 import 'package:foodyore/Screens/Home/Menu/Menu_Card.dart';
+import 'package:foodyore/controller/Menu_Controller.dart';
+import 'package:foodyore/controller/category_controller.dart';
+import 'package:foodyore/data/response/api_status.dart';
+import 'package:foodyore/model/menu_model.dart';
+import 'package:foodyore/res/app_urls.dart';
 import 'package:foodyore/utils/Colors/AppColors.dart';
 import 'package:foodyore/utils/helpers/App_Content.dart';
 import 'package:foodyore/utils/helpers/Custom/Custom_AppBar.dart';
+import 'package:foodyore/utils/helpers/Custom/Custom_Loder.dart';
 import 'package:foodyore/utils/helpers/Custom/Custom_butoons.dart';
 import 'package:foodyore/utils/styles/Text_Styles.dart';
 import 'package:get/get.dart';
+import 'package:iconsax_flutter/iconsax_flutter.dart';
 
-class MenuItemWidget extends StatelessWidget {
-  const MenuItemWidget({Key? key}) : super(key: key);
+class MenuItemWidget extends StatefulWidget {
+  final String categoryId;
+  final String subCategoryId;
+  final String hostId;
+  final String locationId;
+  final String titleName;
+  const MenuItemWidget({
+    Key? key,
+    required this.categoryId,
+    required this.subCategoryId,
+    required this.hostId,
+    required this.locationId,
+    required this.titleName,
+  }) : super(key: key);
+
+  @override
+  State<MenuItemWidget> createState() => _MenuItemWidgetState();
+}
+
+class _MenuItemWidgetState extends State<MenuItemWidget> {
+  final MenuItemController _menuController = Get.put(MenuItemController());
+  final CategoryController _categoryController = Get.put(CategoryController());
+
+  @override
+  void initState() {
+    super.initState();
+    getMenuData();
+  }
+
+  // for get menu data
+  void getMenuData() async {
+    await _menuController.fetchAllMenuItems(
+      context: context,
+      categoryId: widget.categoryId,
+      subCategoryId: widget.subCategoryId,
+      hostId: widget.hostId,
+      locationId: widget.locationId,
+    );
+    await _categoryController.fetchAmenitiesData(
+      context: context,
+      catId: widget.categoryId,
+      subCatId: widget.subCategoryId,
+      hostId: widget.hostId,
+      locationId: widget.locationId,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.backgroundColor,
       appBar: CustomAppbar(title: 'MENU'),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildBreadcrumbs(),
-            const SizedBox(height: 20),
+      body: Obx(() {
+        if (_menuController.menuItemData.value.status == Status.LOADING) {
+          return Center(child: CustomLoder(color: AppColors.primaryColor));
+        } else if (_menuController.menuItemData.value == Status.ERROR) {
+          return Center(child: Text("Something went wrong"));
+        } else {
+          final menuData = _menuController.menuItemData.value.data!.data!;
+          return RefreshIndicator(
+            onRefresh: () async => getMenuData(),
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildBreadcrumbs(menuData.first, widget.titleName),
+                  const SizedBox(height: 20),
 
-            /// MENU CARDS
-            const MenuCard(
-              image: 'assets/images/panner.jpg',
-              title: '2 Kg Paneer Unlimited Roti And Rice ',
+                  ListView.builder(
+                    shrinkWrap: true,
+                    physics: NeverScrollableScrollPhysics(),
+                    itemCount: menuData.length,
+                    itemBuilder: (context, index) {
+                      final item = menuData[index];
+                      return MenuCard(menu: item);
+                    },
+                  ),
+
+                  // const MenuCard(
+                  //   image: 'assets/images/panner.jpg',
+                  //   title: '2 Kg Paneer Unlimited Roti And Rice ',
+                  // ),
+                  // const SizedBox(height: 10),
+                  // const MenuCard(
+                  //   image: 'assets/images/mutton.jpg',
+                  //   title: '1 Kg Mutton With Unlimited Roti Chawal Salad',
+                  // ),
+                  const SizedBox(height: 16),
+
+                  /// SPECIAL ATTRACTIONS
+                  _attractionRow(),
+
+                  const SizedBox(height: 16),
+
+                  // _sectionTitle('Other Special Attractions'),
+                  const SizedBox(height: 6),
+                  // _attractionRow([
+                  //   _expectationCard(
+                  //     image: 'assets/images/fire.jpg',
+                  //     title: 'Birthday Party for couple',
+                  //     amount: '25000',
+                  //   ),
+                  //   _expectationCard(
+                  //     image: 'assets/images/boating.jpg',
+                  //     title: 'Birthday Party (No Food)',
+                  //     amount: '150',
+                  //   ),
+                  // ]),
+                  const SizedBox(height: 60),
+                ],
+              ),
             ),
-            const SizedBox(height: 10),
-            const MenuCard(
-              image: 'assets/images/mutton.jpg',
-              title: '1 Kg Mutton With Unlimited Roti Chawal Salad',
-            ),
+          );
+        }
+      }),
 
-            const SizedBox(height: 16),
-
-            /// SPECIAL ATTRACTIONS
-            _sectionTitle('Add Special Attractions to Your Package'),
-            const SizedBox(height: 6),
-            _attractionRow([
-              _expectationCard(
-                image: 'assets/images/fire.jpg',
-                title: 'FireLand',
-                amount: '200 per hour',
-              ),
-              _expectationCard(
-                image: 'assets/images/boating.jpg',
-                title: 'Boating',
-                amount: '200 per hour',
-              ),
-            ]),
-
-            const SizedBox(height: 16),
-
-            _sectionTitle('Other Special Attractions'),
-            const SizedBox(height: 6),
-            _attractionRow([
-              _expectationCard(
-                image: 'assets/images/fire.jpg',
-                title: 'Birthday Party for couple',
-                amount: '25000',
-              ),
-              _expectationCard(
-                image: 'assets/images/boating.jpg',
-                title: 'Birthday Party (No Food)',
-                amount: '150',
-              ),
-            ]),
-            const SizedBox(height: 60),
-          ],
-        ),
-      ),
       bottomSheet: Container(
         width: double.infinity,
         color: AppColors.backgroundColor,
@@ -91,7 +153,6 @@ class MenuItemWidget extends StatelessWidget {
     );
   }
 
-  // ---------------------------------------------------------------------------
   /// HELPERS
 
   Widget _sectionTitle(String text) {
@@ -104,30 +165,54 @@ class MenuItemWidget extends StatelessWidget {
     );
   }
 
-  Widget _attractionRow(List<Widget> children) {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      physics: const BouncingScrollPhysics(), 
-      child: Row(
-        children: children
-            .map(
-              (e) =>
-                  Padding(padding: const EdgeInsets.only(right: 10), child: e),
-            )
-            .toList(),
-      ),
-    );
+  Widget _attractionRow() {
+    return Obx(() {
+      if (_categoryController.amenitiesData.value == Status.LOADING) {
+        return const Center(child: CustomLoder(color: AppColors.primaryColor));
+      }
+
+      if (_categoryController.amenitiesData.value == Status.ERROR) {
+        return const SizedBox();
+      }
+
+      final amenitiesData =
+          (_categoryController.amenitiesData.value.data?.amenitiesData);
+
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _sectionTitle('Add Special Attractions to Your Package'),
+          const SizedBox(height: 6),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            physics: const BouncingScrollPhysics(),
+            child: Row(
+              children: amenitiesData!.map((item) {
+                return Padding(
+                  padding: const EdgeInsets.only(right: 10),
+                  child: _expectationCard(
+                    image: AppUrl.baseUrl + (item.amenitieImage ?? ''),
+                    title: item.amenitieType ?? '',
+                    amount: item.price.toString(),
+                  ),
+                );
+              }).toList(),
+            ),
+          ),
+        ],
+      );
+    });
   }
 
-  Widget _buildBreadcrumbs() {
+  Widget _buildBreadcrumbs(MenuItem menuData, String title) {
     return Wrap(
       crossAxisAlignment: WrapCrossAlignment.center,
       children: [
-        _breadcrumbText('FARMLANDS'),
+        _breadcrumbText(menuData.categoryName?.toUpperCase() ?? ''),
         _dot(),
-        _breadcrumbText('ORCHARDS BY ADITYA SINGH'),
+        _breadcrumbText(menuData.subCategoryName?.toUpperCase() ?? ''),
         _dot(),
-        _breadcrumbText('ADITYA AAM KA BAAG', bold: true),
+        _breadcrumbText(title.toUpperCase(), bold: true),
         _dot(),
         _breadcrumbText('BOOKING'),
       ],
@@ -158,7 +243,27 @@ class MenuItemWidget extends StatelessWidget {
       children: [
         ClipRRect(
           borderRadius: BorderRadius.circular(20),
-          child: Image.asset(image, width: 160, height: 100, fit: BoxFit.cover),
+          child: Image.network(
+            image,
+            width: 160,
+            height: 100,
+            fit: BoxFit.cover,
+            errorBuilder: (context, error, stackTrace) {
+              return Container(
+                width: 160,
+                height: 100,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.bottomCenter,
+                    end: Alignment.topCenter,
+                    colors: [Colors.black.withOpacity(0.5), Colors.transparent],
+                  ),
+                ),
+
+                child: Icon(Iconsax.image_copy, color: AppColors.white),
+              );
+            },
+          ),
         ),
         Positioned(
           right: 0,

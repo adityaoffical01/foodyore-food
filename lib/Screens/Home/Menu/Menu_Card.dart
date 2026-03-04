@@ -1,16 +1,23 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
+import 'package:foodyore/controller/cart_controller.dart';
+import 'package:foodyore/model/menu_model.dart';
+import 'package:foodyore/res/app_urls.dart';
 import 'package:foodyore/utils/Colors/AppColors.dart';
+import 'package:foodyore/utils/helpers/Custom/Custom_Loder.dart';
 import 'package:foodyore/utils/styles/Text_Styles.dart';
+import 'package:get/get.dart';
+import 'package:iconsax_flutter/iconsax_flutter.dart';
 
 class MenuCard extends StatelessWidget {
-  final String image;
-  final String title;
-
-  const MenuCard({super.key, required this.image, required this.title});
-
+  final MenuItem menu;
+  MenuCard({super.key, required this.menu});
+  final CartController _cartController = Get.put(CartController());
   @override
   Widget build(BuildContext context) {
     return Container(
+      margin: const EdgeInsets.symmetric(vertical: 8),
       decoration: BoxDecoration(
         color: AppColors.white,
         borderRadius: BorderRadius.circular(20),
@@ -27,94 +34,156 @@ class MenuCard extends StatelessWidget {
               children: [
                 ClipRRect(
                   borderRadius: BorderRadius.circular(12),
-                  child: Image.asset(
-                    image,
+                  child: Image.network(
+                    AppUrl.baseUrl + (menu.itemImage ?? ''),
                     height: 80,
                     width: 80,
                     fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Container(
+                        height: 80,
+                        width: 80,
+                        color: AppColors.textHintColor.withOpacity(0.2),
+                        child: Icon(Iconsax.image_copy, color: AppColors.grey),
+                      );
+                    },
                   ),
                 ),
                 const SizedBox(width: 10),
 
                 Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        title,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: AppTextStyles.bodyMedium.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.black,
-                        ),
-                      ),
-                      const SizedBox(height: 6),
+                  child: Builder(
+                    builder: (_) {
+                      final int totalPrice = menu.price ?? 0;
+                      final int guestCount =
+                          int.tryParse(menu.numberOfGuest ?? '0') ?? 0;
 
-                      /// PERFECT ALIGNMENT TABLE
-                      Table(
-                        columnWidths: const {
-                          0: FlexColumnWidth(),
-                          1: FlexColumnWidth(),
-                          2: FlexColumnWidth(),
-                        },
-                        children: const [
-                          TableRow(
+                      final int perPerson = guestCount > 0
+                          ? (totalPrice ~/ guestCount)
+                          : 0;
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            menu.itemDetails ?? '',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: AppTextStyles.bodyMedium.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.black,
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+
+                          /// PERFECT ALIGNMENT TABLE
+                          Table(
+                            columnWidths: const {
+                              0: FlexColumnWidth(),
+                              1: FlexColumnWidth(),
+                              2: FlexColumnWidth(),
+                            },
                             children: [
-                              InfoColumn(
-                                title: 'MENU TYPE',
-                                value: 'Vegetarian',
+                              TableRow(
+                                children: [
+                                  InfoColumn(
+                                    title: 'MENU TYPE',
+                                    value: menu.itemType?.capitalize ?? '',
+                                  ),
+                                  InfoColumn(
+                                    title: 'PACKAGE',
+                                    value: menu.menuType?.capitalize ?? '',
+                                  ),
+                                  InfoColumn(
+                                    title: 'NO. OF GUESTS',
+                                    value: menu.numberOfGuest ?? '',
+                                  ),
+                                ],
                               ),
-                              InfoColumn(
-                                title: 'PACKAGE',
-                                value: 'Packages/Bundle',
+                              TableRow(
+                                children: [
+                                  SizedBox(height: 6),
+                                  SizedBox(height: 6),
+                                  SizedBox(height: 6),
+                                ],
                               ),
-                              InfoColumn(title: 'NO. OF GUESTS', value: '4-20'),
+                              TableRow(
+                                children: [
+                                  InfoColumn(
+                                    title: 'TOTAL',
+                                    value:
+                                        '₹${menu.price} (min. ${menu.numberOfGuest ?? ''})',
+                                  ),
+                                  InfoColumn(
+                                    title: 'PER PERSON',
+                                    value: '₹${perPerson}',
+                                  ),
+                                  SizedBox(),
+                                ],
+                              ),
                             ],
                           ),
-                          TableRow(
-                            children: [
-                              SizedBox(height: 6),
-                              SizedBox(height: 6),
-                              SizedBox(height: 6),
-                            ],
-                          ),
-                          TableRow(
-                            children: [
-                              InfoColumn(
-                                title: 'TOTAL',
-                                value: '₹2000 (min. 4)',
-                              ),
-                              InfoColumn(title: 'PACKAGE', value: '₹1000'),
-                              SizedBox(),
-                            ],
-                          ),
+
+                          const SizedBox(height: 6),
+
+                          // _addToCartButton(),
                         ],
-                      ),
-
-                      const SizedBox(height: 6),
-
-                      // _addToCartButton(),
-                    ],
+                      );
+                    },
                   ),
                 ),
               ],
             ),
           ),
-          Container(
-            width: double.infinity,
-            padding: EdgeInsets.symmetric(horizontal: 20, vertical: 6),
-            decoration: BoxDecoration(
-              color: AppColors.primaryColor,
-              borderRadius: BorderRadius.vertical(bottom: Radius.circular(20)),
-            ),
-            child: Center(
-              child: Text(
-                'ADD TO CART',
-                style: AppTextStyles.caption.copyWith(
-                  color: AppColors.white,
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
+          GestureDetector(
+            onTap: () async {
+              await _cartController.itemAddToCart(
+                itemId: menu.itemID.toString(),
+                hostId: menu.hostID.toString(),
+                locationId: menu.locationID.toString(),
+                categoryId: menu.categoryID ?? '',
+                subCategoryId: menu.subCategoryID ?? '',
+                price: menu.price.toString(),
+                itemDetails: menu.itemDetails ?? '',
+                itemType: menu.itemType.toString(),
+                quantity: menu.quantity.toString(),
+              );
+            },
+            child: Container(
+              width: double.infinity,
+              padding: EdgeInsets.symmetric(horizontal: 20, vertical: 6),
+              decoration: BoxDecoration(
+                color: AppColors.primaryColor,
+                borderRadius: BorderRadius.vertical(
+                  bottom: Radius.circular(20),
+                ),
+              ),
+              child: Center(
+                child: Obx(
+                  () => _cartController.isLoading.value
+                      ? Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          spacing: 10,
+                          children: [
+                            CustomLoder(color: AppColors.white, size: 12),
+                            Text(
+                              'LODING...',
+                              style: AppTextStyles.caption.copyWith(
+                                color: AppColors.white,
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        )
+                      : Text(
+                          'ADD TO CART',
+                          style: AppTextStyles.caption.copyWith(
+                            color: AppColors.white,
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                 ),
               ),
             ),

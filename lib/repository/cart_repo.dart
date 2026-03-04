@@ -1,12 +1,13 @@
-import 'package:foodyore/data/network/network_api_services.dart';
-import 'package:foodyore/model/menu_model.dart';
 
-class MenuRepo {
+import 'package:foodyore/data/network/network_api_services.dart';
+import 'package:foodyore/model/cart_model.dart';
+
+class CartRepo {
   final _apiService = NetworkApiServices();
 
-  Future<MenuResponceModel> getMenuData(String urls) async {
+  Future<CartResponseModel> getCartItems(String urls) async {
     dynamic response = await _apiService.getApi(urls);
-    return MenuResponceModel.fromJson(response);
+    return CartResponseModel.fromJson(response);
   }
 
   // Future<AmenitiesListModel> getAniData(String urls) async {

@@ -228,7 +228,7 @@ class CategoryController extends GetxController {
     required String catId,
     required String subCatId,
     required String hostId,
-    String locationId = '',
+    String? locationId = '',
   }) async {
     try {
       amenitiesData.value = ApiResponse.loading();
