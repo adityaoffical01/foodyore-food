@@ -18,6 +18,8 @@ class CustomInputFieldTheme extends StatefulWidget {
   final bool isRequired;
   final double? horizontalPadding;
   final bool obscureText;
+  final int? maxLength; // New property
+  final TextInputAction? textInputAction; // New property
 
   const CustomInputFieldTheme({
     Key? key,
@@ -39,6 +41,8 @@ class CustomInputFieldTheme extends StatefulWidget {
     this.isRequired = false,
     this.horizontalPadding = 20.0,
     this.obscureText = false,
+    this.maxLength, // Initialize
+    this.textInputAction, // Initialize
   }) : super(key: key);
 
   @override
@@ -87,6 +91,8 @@ class _CustomInputFieldThemeState extends State<CustomInputFieldTheme> {
             canRequestFocus: !widget.readOnly!,
             maxLines: widget.obscureText ? 1 : widget.maximumLines,
             obscureText: _obscureText,
+            maxLength: widget.maxLength, // Add maxLength
+            textInputAction: widget.textInputAction, // Add textInputAction
 
             validator: (value) {
               if (widget.isRequired) {
@@ -112,6 +118,7 @@ class _CustomInputFieldThemeState extends State<CustomInputFieldTheme> {
                 vertical: 10,
                 horizontal: 12,
               ),
+              counterText: widget.maxLength != null ? '' : null, // Hide counter if needed
 
               /// 🔹 Eye Button ONLY if obscureText true
               suffixIcon: widget.obscureText
