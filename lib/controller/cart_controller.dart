@@ -15,9 +15,10 @@ class CartController extends GetxController {
       ApiResponse<CartResponseModel>.loading().obs;
 
   //  for get cart
-  Future<void> fetchCartItems({required String deviceId}) async {
+  Future<void> fetchCartItems() async {
     cartData.value = ApiResponse.loading();
-
+    final deviceId = await DeviceService.getDeviceId();
+    print('aditya_device_id: ${deviceId}');
     try {
       final response = await _cartRepo.getCartItems(
         AppUrl.get_cart_urls(deviceId),
@@ -61,8 +62,9 @@ class CartController extends GetxController {
 
       final response = await _cartRepo.postData(AppUrl.cart_URL, body);
       isLoading.value = false;
-      // await fetchCartItems();
+      await fetchCartItems();
       AppUtils.instance.snackBar("Successful", response['message'], false);
+      return true;
     } catch (e) {
       isLoading.value = false;
       AppUtils.instance.snackBar("Error", e.toString(), true);

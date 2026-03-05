@@ -1,11 +1,15 @@
 // ignore_for_file: deprecated_member_use
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:foodyore/Screens/Cart/cart_widget.dart';
 import 'package:foodyore/Screens/Home/Menu/Menu_Card.dart';
 import 'package:foodyore/controller/Menu_Controller.dart';
+import 'package:foodyore/controller/cart_controller.dart';
 import 'package:foodyore/controller/category_controller.dart';
 import 'package:foodyore/data/response/api_status.dart';
+import 'package:foodyore/model/amenities_list_model.dart';
 import 'package:foodyore/model/menu_model.dart';
 import 'package:foodyore/res/app_urls.dart';
 import 'package:foodyore/utils/Colors/AppColors.dart';
@@ -13,6 +17,7 @@ import 'package:foodyore/utils/helpers/App_Content.dart';
 import 'package:foodyore/utils/helpers/Custom/Custom_AppBar.dart';
 import 'package:foodyore/utils/helpers/Custom/Custom_Loder.dart';
 import 'package:foodyore/utils/helpers/Custom/Custom_butoons.dart';
+import 'package:foodyore/utils/helpers/Custom/custom_popup.dart';
 import 'package:foodyore/utils/styles/Text_Styles.dart';
 import 'package:get/get.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
@@ -39,7 +44,7 @@ class MenuItemWidget extends StatefulWidget {
 class _MenuItemWidgetState extends State<MenuItemWidget> {
   final MenuItemController _menuController = Get.put(MenuItemController());
   final CategoryController _categoryController = Get.put(CategoryController());
-
+  final CartController _cartController = Get.put(CartController());
   @override
   void initState() {
     super.initState();
@@ -169,38 +174,44 @@ class _MenuItemWidgetState extends State<MenuItemWidget> {
     return Obx(() {
       if (_categoryController.amenitiesData.value == Status.LOADING) {
         return const Center(child: CustomLoder(color: AppColors.primaryColor));
-      }
-
-      if (_categoryController.amenitiesData.value == Status.ERROR) {
+      } else if (_categoryController.amenitiesData.value == Status.ERROR ||
+          _categoryController
+              .amenitiesData
+              .value
+              .data!
+              .amenitiesData!
+              .isEmpty) {
         return const SizedBox();
-      }
+      } else {
+        final amenitiesData =
+            (_categoryController.amenitiesData.value.data?.amenitiesData);
 
-      final amenitiesData =
-          (_categoryController.amenitiesData.value.data?.amenitiesData);
-
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _sectionTitle('Add Special Attractions to Your Package'),
-          const SizedBox(height: 6),
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            physics: const BouncingScrollPhysics(),
-            child: Row(
-              children: amenitiesData!.map((item) {
-                return Padding(
-                  padding: const EdgeInsets.only(right: 10),
-                  child: _expectationCard(
-                    image: AppUrl.baseUrl + (item.amenitieImage ?? ''),
-                    title: item.amenitieType ?? '',
-                    amount: item.price.toString(),
-                  ),
-                );
-              }).toList(),
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _sectionTitle('Add Special Attractions to Your Package'),
+            const SizedBox(height: 6),
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              physics: const BouncingScrollPhysics(),
+              child: Row(
+                children: amenitiesData!.map((item) {
+                  return Padding(
+                    padding: const EdgeInsets.only(right: 10),
+                    child: _expectationCard(
+                      item: item,
+                      image: AppUrl.baseUrl + (item.amenitieImage ?? ''),
+                      title: item.amenitieType ?? '',
+                      amount: item.price.toString(),
+                      isInCart: item.alreadyAddedToCart ?? false,
+                    ),
+                  );
+                }).toList(),
+              ),
             ),
-          ),
-        ],
-      );
+          ],
+        );
+      }
     });
   }
 
@@ -238,6 +249,8 @@ class _MenuItemWidgetState extends State<MenuItemWidget> {
     required String image,
     required String title,
     required String amount,
+    required bool isInCart,
+    required AmenitiesData item,
   }) {
     return Stack(
       children: [
@@ -268,7 +281,57 @@ class _MenuItemWidgetState extends State<MenuItemWidget> {
         Positioned(
           right: 0,
           top: 0,
-          child: QtySelector(onIncrease: () {}, onDecrease: () {}),
+          child: isInCart != true
+              ? InkWell(
+                  onTap: () async {
+                    final confirmed = await _showAddToCartConfirmation(context);
+                    if (!confirmed) return;
+
+                    await _cartController
+                        .itemAddToCart(
+                          itemId: item.amenitieId.toString(),
+                          hostId: item.hostId.toString(),
+                          locationId: item.locationId.toString(),
+                          categoryId: item.categoryId ?? '',
+                          subCategoryId: item.subCategoryId ?? '',
+                          price: item.price.toString(),
+                          itemDetails: item.amenitieType.toString(),
+                          itemType: item.amenitieType.toString(),
+                          quantity: item.unit.toString(),
+                        )
+                        .then((isAdd) async {
+                          print('aditya_is_add: ${isAdd}');
+                          if (isAdd == true) {
+                            await _categoryController.fetchAmenitiesData(
+                              context: context,
+                              catId: widget.categoryId,
+                              subCatId: widget.subCategoryId,
+                              hostId: widget.hostId,
+                              locationId: widget.locationId,
+                            );
+                          }
+                        });
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 2,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.primaryColor,
+                      border: Border.all(
+                        color: AppColors.primaryColor,
+                        width: 1.2,
+                      ),
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                    child: Text(
+                      'Add',
+                      style: AppTextStyles.buttonText.copyWith(fontSize: 12),
+                    ),
+                  ),
+                )
+              : QtySelector(onIncrease: () {}, onDecrease: () {}),
         ),
         Positioned(
           bottom: 6,
@@ -295,10 +358,32 @@ class _MenuItemWidgetState extends State<MenuItemWidget> {
   }
 }
 
+Future<bool> _showAddToCartConfirmation(BuildContext context) async {
+  final completer = Completer<bool>();
+
+  CustomPopup.show(
+    context: context,
+    title: 'Confirm',
+    message: 'Do you want to add this item to cart?',
+    cancelButtonText: 'No',
+    submitButtonText: 'Yes',
+    submitButtonColor: AppColors.primaryColor,
+    onCancel: () {
+      if (!completer.isCompleted) completer.complete(false);
+    },
+    onSubmit: () {
+      if (!completer.isCompleted) completer.complete(true);
+    },
+  );
+
+  return completer.future;
+}
+
 // for qty
 class QtySelector extends StatelessWidget {
   final VoidCallback onIncrease;
   final VoidCallback onDecrease;
+
   const QtySelector({required this.onIncrease, required this.onDecrease});
   @override
   Widget build(BuildContext context) {

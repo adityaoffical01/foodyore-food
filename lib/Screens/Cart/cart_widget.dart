@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:foodyore/Screens/Cart/Widget/Cart_Item_card.dart';
 import 'package:foodyore/controller/cart_controller.dart';
 import 'package:foodyore/data/response/api_status.dart';
+import 'package:foodyore/model/cart_model.dart';
 import 'package:foodyore/services/device_id_services.dart';
 import 'package:foodyore/utils/Colors/AppColors.dart';
 import 'package:foodyore/utils/helpers/App_Content.dart';
@@ -34,8 +35,7 @@ class _CartWidgetState extends State<CartWidget> {
   }
 
   void getCartData() async {
-    final deviceId = await DeviceService.getDeviceId();
-    await _cartController.fetchCartItems(deviceId: deviceId);
+    await _cartController.fetchCartItems();
   }
 
   @override
@@ -62,319 +62,27 @@ class _CartWidgetState extends State<CartWidget> {
                   child: Center(child: Text('Failed to load cart items')),
                 );
               } else {
+                final cartItems =
+                    _cartController.cartData.value.data?.data ?? [];
                 return Column(
                   spacing: 2,
                   children: [
                     SizedBox(height: 10),
-                    Container(
-                      margin: EdgeInsets.symmetric(horizontal: 16.0),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12.0,
-                        vertical: 8.0,
-                      ),
-                      decoration: BoxDecoration(
-                        color: AppColors.white,
-                        borderRadius: BorderRadius.vertical(
-                          top: Radius.circular(12.0),
-                        ),
-                      ),
-                      child: Row(
-                        children: [
-                          Checkbox(
-                            value: isAllSelected,
-                            activeColor: AppColors.primaryColor,
-                            onChanged: (value) {
-                              setState(() {
-                                isAllSelected = value!;
-                                isItemSelected = value;
-                              });
-                            },
-                            visualDensity: VisualDensity(
-                              horizontal: -4,
-                              vertical: -4,
-                            ),
-                          ),
-                          Text(
-                            '2/2 ITEMS SELECTED ',
-                            style: AppTextStyles.bodySmall.copyWith(
-                              color: AppColors.black,
-                              fontFamily: AppFonts.regular,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          Spacer(),
-                          GestureDetector(
-                            onTap: () {
-                              showCustomSnackBar(
-                                message: 'Clear all items from cart',
-                                isError: true,
-                              );
-                            },
-                            child: Icon(
-                              Iconsax.trash_copy,
-                              size: 22.0,
-                              color: AppColors.red,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+                    _cartHeder(),
                     // for location discription
-                    Container(
-                      margin: EdgeInsets.symmetric(horizontal: 16.0),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16.0,
-                        vertical: 10.0,
-                      ),
-                      decoration: BoxDecoration(color: AppColors.white),
-                      child: Row(
-                        spacing: 5,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            'Vilage',
-                            style: AppTextStyles.bodySmall.copyWith(
-                              fontWeight: FontWeight.bold,
-                              fontFamily: AppFonts.regular,
-                              fontSize: 11.0,
-                            ),
-                          ),
-                          Icon(Icons.circle, size: 6),
-                          Text(
-                            'Raja Itaunja Bahadurpur',
-                            style: AppTextStyles.bodySmall.copyWith(
-                              fontWeight: FontWeight.bold,
-                              fontFamily: AppFonts.regular,
-                              fontSize: 11.0,
-                            ),
-                          ),
-                          Icon(Icons.circle, size: 6),
-                          Text(
-                            'Raghvendra Singh',
-                            style: AppTextStyles.bodySmall.copyWith(
-                              fontWeight: FontWeight.bold,
-                              fontFamily: AppFonts.regular,
-                              fontSize: 11.0,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+                    _LocationDiscription(),
                     // for cart items card
-                    ListView.separated(
-                      shrinkWrap: true,
-                      padding: EdgeInsets.zero,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: 2,
-                      itemBuilder: (context, index) {
-                        return CartItemCard(
-                          isSelected: isItemSelected,
-                          onToggle: () {
-                            setState(() {
-                              isItemSelected = !isItemSelected;
-                            });
-                          },
-                          onIncrease: () {
-                            showCustomSnackBar(
-                              message: 'Increase item quantity',
-                              isError: false,
-                            );
-                          },
-                          onDecrease: () {
-                            showCustomSnackBar(
-                              message: 'Decrease item quantity',
-                              isError: false,
-                            );
-                          },
-                          onRemove: () {
-                            showCustomSnackBar(
-                              message: 'Item removed',
-                              isError: true,
-                            );
-                          },
-                        );
-                      },
-                      separatorBuilder: (context, index) =>
-                          const SizedBox(height: 2),
-                    ),
-                    // for coopan
-                    Container(
-                      margin: EdgeInsets.symmetric(horizontal: 16.0),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16.0,
-                        vertical: 10.0,
-                      ),
-                      decoration: BoxDecoration(color: AppColors.white),
-                      child: Row(
-                        spacing: 5,
-                        children: [
-                          Icon(
-                            Iconsax.ticket_2_copy,
-                            size: 16.0,
-                            color: AppColors.primaryColor,
-                          ),
-                          Text(
-                            '10 % Discount is avalible for your order',
-                            style: AppTextStyles.bodyMedium.copyWith(
-                              fontWeight: FontWeight.bold,
-                              fontFamily: AppFonts.regular,
-                              color: const Color.fromARGB(255, 15, 117, 15),
-                              // fontSize: 11.0,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    // for price biferfication
-                    Container(
-                      margin: EdgeInsets.symmetric(horizontal: 16.0),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16.0,
-                        vertical: 12.0,
-                      ),
-                      decoration: BoxDecoration(
-                        color: AppColors.white,
-                        borderRadius: BorderRadius.vertical(
-                          bottom: Radius.circular(12.0),
-                        ),
-                      ),
-                      child: Column(
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                'PRICE BREAKUP (2 ITEMS)',
-                                style: AppTextStyles.bodyMedium.copyWith(
-                                  color: AppColors.textPrimary,
-                                ),
-                              ),
-                              Icon(
-                                Iconsax.info_circle_copy,
-                                size: 18,
-                                color: AppColors.primaryColor,
-                              ),
-                            ],
-                          ),
-                          Divider(
-                            color: AppColors.primaryColor.withOpacity(0.4),
-                          ),
-                          // for total item price
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                'Item Total',
-                                style: AppTextStyles.bodySmall.copyWith(
-                                  color: AppColors.textSecondary,
-                                  fontFamily: AppFonts.regular,
-                                  fontSize: 11,
-                                ),
-                              ),
-                              Text(
-                                '${AppContent().moneySymbol} 250.0',
-                                style: AppTextStyles.bodySmall.copyWith(
-                                  color: AppColors.textSecondary,
-                                  fontFamily: AppFonts.regular,
-                                  fontSize: 11,
-                                ),
-                              ),
-                            ],
-                          ),
-                          // for tax percantage
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                'Tax',
-                                style: AppTextStyles.bodySmall.copyWith(
-                                  color: AppColors.textSecondary,
-                                  fontFamily: AppFonts.regular,
-                                  fontSize: 11,
-                                ),
-                              ),
-                              Text(
-                                '18 %',
-                                style: AppTextStyles.bodySmall.copyWith(
-                                  color: AppColors.textSecondary,
-                                  fontFamily: AppFonts.regular,
-                                  fontSize: 11,
-                                ),
-                              ),
-                            ],
-                          ),
-                          // total tax amount
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                'Tax amount',
-                                style: AppTextStyles.bodySmall.copyWith(
-                                  color: AppColors.textSecondary,
-                                  fontFamily: AppFonts.regular,
-                                  fontSize: 11,
-                                ),
-                              ),
-                              Text(
-                                '${AppContent().moneySymbol} 50.0',
-                                style: AppTextStyles.bodySmall.copyWith(
-                                  color: AppColors.textSecondary,
-                                  fontFamily: AppFonts.regular,
-                                  fontSize: 11,
-                                ),
-                              ),
-                            ],
-                          ),
-                          // for discount
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                'Discount',
-                                style: AppTextStyles.bodySmall.copyWith(
-                                  color: AppColors.textSecondary,
-                                  fontFamily: AppFonts.regular,
-                                  fontSize: 11,
-                                ),
-                              ),
-                              Text(
-                                '${AppContent().moneySymbol} 10.0',
-                                style: AppTextStyles.bodySmall.copyWith(
-                                  color: AppColors.textSecondary,
-                                  fontFamily: AppFonts.regular,
-                                  fontSize: 11,
-                                ),
-                              ),
-                            ],
-                          ),
-                          SizedBox(height: 5.0),
-                          CustomDottedDivider(
-                            color: AppColors.primaryColor.withOpacity(0.5),
-                          ),
-                          SizedBox(height: 5.0),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                'Total Amount',
-                                style: AppTextStyles.bodyMedium.copyWith(
-                                  color: AppColors.textPrimary,
-                                ),
-                              ),
-                              Text(
-                                '${AppContent().moneySymbol} 290.0/-',
-                                style: AppTextStyles.bodyMedium.copyWith(
-                                  color: AppColors.textPrimary,
-                                  fontFamily: AppFonts.regular,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
+                    _cartItems(cartItems: cartItems),
 
+                    // for coopan
+                    _coopanSection(),
+                    // for price biferfication
+                    _priceBiferficationSection(
+                      priceBreakup:
+                          _cartController.cartData.value.data?.priceBreakup ??
+                          PriceBreakup(),
+                      totalItems: '${cartItems.length} ',
+                    ),
                     SizedBox(height: 100),
                   ],
                 );
@@ -422,6 +130,302 @@ class _CartWidgetState extends State<CartWidget> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _cartHeder() {
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: 16.0),
+      padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(12.0)),
+      ),
+      child: Row(
+        children: [
+          Checkbox(
+            value: isAllSelected,
+            activeColor: AppColors.primaryColor,
+            onChanged: (value) {
+              setState(() {
+                isAllSelected = value!;
+                isItemSelected = value;
+              });
+            },
+            visualDensity: VisualDensity(horizontal: -4, vertical: -4),
+          ),
+          Text(
+            '2/2 ITEMS SELECTED ',
+            style: AppTextStyles.bodySmall.copyWith(
+              color: AppColors.black,
+              fontFamily: AppFonts.regular,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          Spacer(),
+          GestureDetector(
+            onTap: () {
+              showCustomSnackBar(
+                message: 'Clear all items from cart',
+                isError: true,
+              );
+            },
+            child: Icon(Iconsax.trash_copy, size: 22.0, color: AppColors.red),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // for location discription
+  Widget _LocationDiscription() {
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: 16.0),
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
+      decoration: BoxDecoration(color: AppColors.white),
+      child: Row(
+        spacing: 5,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            'Vilage',
+            style: AppTextStyles.bodySmall.copyWith(
+              fontWeight: FontWeight.bold,
+              fontFamily: AppFonts.regular,
+              fontSize: 11.0,
+            ),
+          ),
+          Icon(Icons.circle, size: 6),
+          Text(
+            'Raja Itaunja Bahadurpur',
+            style: AppTextStyles.bodySmall.copyWith(
+              fontWeight: FontWeight.bold,
+              fontFamily: AppFonts.regular,
+              fontSize: 11.0,
+            ),
+          ),
+          Icon(Icons.circle, size: 6),
+          Text(
+            'Raghvendra Singh',
+            style: AppTextStyles.bodySmall.copyWith(
+              fontWeight: FontWeight.bold,
+              fontFamily: AppFonts.regular,
+              fontSize: 11.0,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // for cart items card
+  Widget _cartItems({required List cartItems}) {
+    return ListView.separated(
+      shrinkWrap: true,
+      padding: EdgeInsets.zero,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: cartItems.length,
+      itemBuilder: (context, index) {
+        return CartItemCard(
+          isSelected: isItemSelected,
+          onToggle: () {
+            setState(() {
+              isItemSelected = !isItemSelected;
+            });
+          },
+          onIncrease: () {
+            showCustomSnackBar(
+              message: 'Increase item quantity',
+              isError: false,
+            );
+          },
+          onDecrease: () {
+            showCustomSnackBar(
+              message: 'Decrease item quantity',
+              isError: false,
+            );
+          },
+          onRemove: () {
+            showCustomSnackBar(message: 'Item removed', isError: true);
+          },
+          cartItem: cartItems[index],
+        );
+      },
+      separatorBuilder: (context, index) => const SizedBox(height: 2),
+    );
+  }
+
+  // for coopan section
+  Widget _coopanSection() {
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: 16.0),
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
+      decoration: BoxDecoration(color: AppColors.white),
+      child: Row(
+        spacing: 5,
+        children: [
+          Icon(
+            Iconsax.ticket_2_copy,
+            size: 16.0,
+            color: AppColors.primaryColor,
+          ),
+          Text(
+            '10 % Discount is avalible for your order',
+            style: AppTextStyles.bodyMedium.copyWith(
+              fontWeight: FontWeight.bold,
+              fontFamily: AppFonts.regular,
+              color: const Color.fromARGB(255, 15, 117, 15),
+              // fontSize: 11.0,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // for price biferfication section
+  Widget _priceBiferficationSection({
+    required PriceBreakup priceBreakup,
+    required String totalItems,
+  }) {
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: 16.0),
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.vertical(bottom: Radius.circular(12.0)),
+      ),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'PRICE BREAKUP (${totalItems} ITEMS)',
+                style: AppTextStyles.bodyMedium.copyWith(
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              Icon(
+                Iconsax.info_circle_copy,
+                size: 18,
+                color: AppColors.primaryColor,
+              ),
+            ],
+          ),
+          Divider(color: AppColors.primaryColor.withOpacity(0.4)),
+          // for total item price
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Item Total',
+                style: AppTextStyles.bodySmall.copyWith(
+                  color: AppColors.textSecondary,
+                  fontFamily: AppFonts.regular,
+                  fontSize: 11,
+                ),
+              ),
+              Text(
+                '${AppContent().moneySymbol} ${priceBreakup.itemTotal ?? 0.0}',
+                style: AppTextStyles.bodySmall.copyWith(
+                  color: AppColors.textSecondary,
+                  fontFamily: AppFonts.regular,
+                  fontSize: 11,
+                ),
+              ),
+            ],
+          ),
+          // for tax percantage
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Tax',
+                style: AppTextStyles.bodySmall.copyWith(
+                  color: AppColors.textSecondary,
+                  fontFamily: AppFonts.regular,
+                  fontSize: 11,
+                ),
+              ),
+              Text(
+                '${priceBreakup.taxPercent} %',
+                style: AppTextStyles.bodySmall.copyWith(
+                  color: AppColors.textSecondary,
+                  fontFamily: AppFonts.regular,
+                  fontSize: 11,
+                ),
+              ),
+            ],
+          ),
+          // total tax amount
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Tax amount',
+                style: AppTextStyles.bodySmall.copyWith(
+                  color: AppColors.textSecondary,
+                  fontFamily: AppFonts.regular,
+                  fontSize: 11,
+                ),
+              ),
+              Text(
+                '${AppContent().moneySymbol} ${priceBreakup.taxAmount ?? 0.0}',
+                style: AppTextStyles.bodySmall.copyWith(
+                  color: AppColors.textSecondary,
+                  fontFamily: AppFonts.regular,
+                  fontSize: 11,
+                ),
+              ),
+            ],
+          ),
+          // for discount
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Discount',
+                style: AppTextStyles.bodySmall.copyWith(
+                  color: AppColors.textSecondary,
+                  fontFamily: AppFonts.regular,
+                  fontSize: 11,
+                ),
+              ),
+              Text(
+                '${AppContent().moneySymbol} ${priceBreakup.discountAmount ?? 0.0}',
+                style: AppTextStyles.bodySmall.copyWith(
+                  color: AppColors.textSecondary,
+                  fontFamily: AppFonts.regular,
+                  fontSize: 11,
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 5.0),
+          CustomDottedDivider(color: AppColors.primaryColor.withOpacity(0.5)),
+          SizedBox(height: 5.0),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Total Amount',
+                style: AppTextStyles.bodyMedium.copyWith(
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              Text(
+                '${AppContent().moneySymbol} ${priceBreakup.totalAmount ?? 0.0}',
+                style: AppTextStyles.bodyMedium.copyWith(
+                  color: AppColors.textPrimary,
+                  fontFamily: AppFonts.regular,
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }

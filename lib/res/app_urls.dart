@@ -36,4 +36,22 @@ class AppUrl {
 
   static String get_cart_urls(String userMachine) =>
       '$baseSlugUrl/cart?userMachine=$userMachine';
+
+  static String checkAvailabilityUrl({
+    required String locationId,
+    required String checkDate,
+    required String fromTime,
+    required String toTime,
+  }) {
+    return Uri.parse(
+      '$baseSlugUrl/hosts/check-availability',
+    ).replace(
+      queryParameters: {
+        'locationId': locationId,
+        'checkDate': checkDate,
+        'fromTime': fromTime,
+        'toTime': toTime,
+      },
+    ).toString();
+  }
 }

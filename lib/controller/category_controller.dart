@@ -44,6 +44,7 @@ class CategoryController extends GetxController {
       pinCode: location?.pinCode ?? host.pinCode,
       latitude: location?.latitude ?? host.latitude.toString(),
       longitude: location?.longitude ?? host.longitude.toString(),
+      locationId: location?.locationId ?? host.locationId.toString(),
     );
   }
 
@@ -222,6 +223,7 @@ class CategoryController extends GetxController {
 
   Rx<ApiResponse<AmenitiesListModel>> amenitiesData =
       ApiResponse<AmenitiesListModel>.loading().obs;
+  final RxBool isCheckingAvailability = false.obs;
 
   Future<void> fetchAmenitiesData({
     required BuildContext context,
@@ -248,6 +250,53 @@ class CategoryController extends GetxController {
       amenitiesData.value = ApiResponse.error(error.toString());
 
       AppUtils.instance.snackBar("Error", error.toString(), true);
+    }
+  }
+
+  Future<bool> checkAvailability({
+    required String locationId,
+    required String checkDate,
+    required String fromTime,
+    required String toTime,
+  }) async {
+    if (locationId.trim().isEmpty) {
+      AppUtils.instance.snackBar("Error", "Location id is missing", true);
+      return false;
+    }
+
+    try {
+      isCheckingAvailability.value = true;
+      final response = await _hostRepo.checkAvailability(
+        AppUrl.checkAvailabilityUrl(
+          locationId: locationId,
+          checkDate: checkDate,
+          fromTime: fromTime,
+          toTime: toTime,
+        ),
+      );
+
+      final bool success = response['success'] == true;
+      final bool isAvailable = response['data']?['isAvailable'] == true;
+      final String message =
+          response['data']?['message']?.toString() ??
+          response['message']?.toString() ??
+          '';
+
+      if (success && isAvailable) {
+        return true;
+      }
+
+      AppUtils.instance.snackBar(
+        "Info",
+        message.isNotEmpty ? message : "Selected slot is not available",
+        true,
+      );
+      return false;
+    } catch (error) {
+      AppUtils.instance.snackBar("Error", error.toString(), true);
+      return false;
+    } finally {
+      isCheckingAvailability.value = false;
     }
   }
 }

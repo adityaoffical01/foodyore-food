@@ -1,11 +1,14 @@
 // ignore_for_file: deprecated_member_use
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:foodyore/controller/cart_controller.dart';
 import 'package:foodyore/model/menu_model.dart';
 import 'package:foodyore/res/app_urls.dart';
 import 'package:foodyore/utils/Colors/AppColors.dart';
 import 'package:foodyore/utils/helpers/Custom/Custom_Loder.dart';
+import 'package:foodyore/utils/helpers/Custom/custom_popup.dart';
 import 'package:foodyore/utils/styles/Text_Styles.dart';
 import 'package:get/get.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
@@ -136,6 +139,9 @@ class MenuCard extends StatelessWidget {
           ),
           GestureDetector(
             onTap: () async {
+              final confirmed = await _showAddToCartConfirmation(context);
+              if (!confirmed) return;
+
               await _cartController.itemAddToCart(
                 itemId: menu.itemID.toString(),
                 hostId: menu.hostID.toString(),
@@ -158,32 +164,13 @@ class MenuCard extends StatelessWidget {
                 ),
               ),
               child: Center(
-                child: Obx(
-                  () => _cartController.isLoading.value
-                      ? Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          spacing: 10,
-                          children: [
-                            CustomLoder(color: AppColors.white, size: 12),
-                            Text(
-                              'LODING...',
-                              style: AppTextStyles.caption.copyWith(
-                                color: AppColors.white,
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        )
-                      : Text(
-                          'ADD TO CART',
-                          style: AppTextStyles.caption.copyWith(
-                            color: AppColors.white,
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
+                child: Text(
+                  'ADD TO CART',
+                  style: AppTextStyles.caption.copyWith(
+                    color: AppColors.white,
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ),
@@ -191,6 +178,27 @@ class MenuCard extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  Future<bool> _showAddToCartConfirmation(BuildContext context) async {
+    final completer = Completer<bool>();
+
+    CustomPopup.show(
+      context: context,
+      title: 'Confirm',
+      message: 'Do you want to add this item to cart?',
+      cancelButtonText: 'No',
+      submitButtonText: 'Yes',
+      submitButtonColor: AppColors.primaryColor,
+      onCancel: () {
+        if (!completer.isCompleted) completer.complete(false);
+      },
+      onSubmit: () {
+        if (!completer.isCompleted) completer.complete(true);
+      },
+    );
+
+    return completer.future;
   }
 
   // Widget _addToCartButton() {

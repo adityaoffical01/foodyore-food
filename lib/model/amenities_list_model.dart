@@ -57,6 +57,7 @@ class AmenitiesData {
   String? modifyOn;
   String? categoryName;
   String? subCategoryName;
+  bool? alreadyAddedToCart;
 
   AmenitiesData({
     this.amenitieId,
@@ -73,6 +74,7 @@ class AmenitiesData {
     this.modifyOn,
     this.categoryName,
     this.subCategoryName,
+    this.alreadyAddedToCart,
   });
 
   AmenitiesData.fromJson(Map<String, dynamic> json) {
@@ -118,6 +120,9 @@ class AmenitiesData {
     if (json["SubCategoryName"] is String) {
       subCategoryName = json["SubCategoryName"];
     }
+    if (json["AlreadyAddedToCart"] is bool) {
+      alreadyAddedToCart = json["AlreadyAddedToCart"];
+    }
   }
 
   static List<AmenitiesData> fromList(List<Map<String, dynamic>> list) {
@@ -140,6 +145,7 @@ class AmenitiesData {
     _data["ModifyOn"] = modifyOn;
     _data["CategoryName"] = categoryName;
     _data["SubCategoryName"] = subCategoryName;
+    _data["AlreadyAddedToCart"] = alreadyAddedToCart;
     return _data;
   }
 }

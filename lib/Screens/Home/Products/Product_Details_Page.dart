@@ -16,6 +16,7 @@ import 'package:foodyore/utils/helpers/Custom/Custom_Loder.dart';
 import 'package:foodyore/utils/helpers/Custom/Custom_butoons.dart';
 import 'package:foodyore/utils/helpers/Custom/Custom_screen_background.dart';
 import 'package:foodyore/utils/styles/Custom_circular_button.dart';
+import 'package:intl/intl.dart';
 
 class ProductDetailsPageWidget extends StatefulWidget {
   final String hostId;
@@ -40,7 +41,8 @@ class _ProductDetailsPageWidgetState extends State<ProductDetailsPageWidget> {
   final PageController _pageController = PageController();
   int _currentIndex = 0;
   DateTime? _selectedBookingDate;
-  TimeOfDay? _selectedBookingTime;
+  TimeOfDay? _selectedFromBookingTime;
+  TimeOfDay? _selectedToBookingTime;
 
   final CategoryController controller = Get.find<CategoryController>();
 
@@ -440,6 +442,16 @@ class _ProductDetailsPageWidgetState extends State<ProductDetailsPageWidget> {
     );
   }
 
+  String _formatBookingDate(DateTime date) {
+    return DateFormat('yyyy-MM-dd').format(date);
+  }
+
+  String _formatBookingTime(BuildContext context, TimeOfDay time) {
+    return MaterialLocalizations.of(
+      context,
+    ).formatTimeOfDay(time, alwaysUse24HourFormat: false);
+  }
+
   Future<void> _showBookingModal() async {
     await showModalBottomSheet<void>(
       context: context,
@@ -452,7 +464,9 @@ class _ProductDetailsPageWidgetState extends State<ProductDetailsPageWidget> {
         return StatefulBuilder(
           builder: (context, setModalState) {
             final canContinue =
-                _selectedBookingDate != null && _selectedBookingTime != null;
+                _selectedBookingDate != null &&
+                _selectedFromBookingTime != null &&
+                _selectedToBookingTime != null;
 
             return SafeArea(
               child: Padding(
@@ -487,43 +501,113 @@ class _ProductDetailsPageWidgetState extends State<ProductDetailsPageWidget> {
                       },
                     ),
                     const SizedBox(height: 12),
-                    _bookingSelectionTile(
-                      title: 'Select Time',
-                      value: _selectedBookingTime == null
-                          ? 'Tap to choose time'
-                          : _selectedBookingTime!.format(context),
-                      icon: Iconsax.watch_copy,
-                      onTap: () async {
-                        await _pickBookingTime(
-                          context,
-                          onChanged: () => setModalState(() {}),
-                        );
-                      },
-                    ),
-                    const SizedBox(height: 20),
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          elevation: 0,
-                          backgroundColor: canContinue
-                              ? AppColors.primaryColor
-                              : AppColors.textHintColor.withAlpha(120),
-                          foregroundColor: AppColors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
+                    Row(
+                      spacing: 12.0,
+                      children: [
+                        Expanded(
+                          child: _bookingSelectionTile(
+                            title: 'From Time',
+                            value: _selectedFromBookingTime == null
+                                ? 'Tap to choose time'
+                                : _selectedFromBookingTime!.format(context),
+                            icon: Iconsax.watch_copy,
+                            onTap: () async {
+                              await _pickBookingTime(
+                                context,
+                                selectedTime: _selectedFromBookingTime,
+                                onChanged: () => setModalState(() {}),
+                                onTimeSelected: (time) {
+                                  _selectedFromBookingTime = time;
+                                },
+                              );
+                            },
                           ),
-                          padding: const EdgeInsets.symmetric(vertical: 14),
                         ),
-                        onPressed: canContinue
-                            ? () {
-                                Navigator.pop(bottomSheetContext);
-                                _goToMenuPage();
-                              }
-                            : null,
-                        child: const Text('Continue'),
-                      ),
+
+                        Expanded(
+                          child: _bookingSelectionTile(
+                            title: 'To Time',
+                            value: _selectedToBookingTime == null
+                                ? 'Tap to choose time'
+                                : _selectedToBookingTime!.format(context),
+                            icon: Iconsax.watch_copy,
+                            onTap: () async {
+                              await _pickBookingTime(
+                                context,
+                                selectedTime: _selectedToBookingTime,
+                                onChanged: () => setModalState(() {}),
+                                onTimeSelected: (time) {
+                                  _selectedToBookingTime = time;
+                                },
+                              );
+                            },
+                          ),
+                        ),
+                      ],
                     ),
+                    const SizedBox(height: 12),
+                    Obx(() {
+                      final bool isChecking =
+                          controller.isCheckingAvailability.value;
+                      return SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            elevation: 0,
+                            backgroundColor: canContinue && !isChecking
+                                ? AppColors.primaryColor
+                                : AppColors.textHintColor.withAlpha(120),
+                            foregroundColor: AppColors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                          ),
+                          onPressed: (!canContinue || isChecking)
+                              ? null
+                              : () {
+                                  // final bool isAvailable = await controller
+                                  //     .checkAvailability(
+                                  //       locationId:
+                                  //           controller.pdpData.value.locationId
+                                  //               ?.trim() ??
+                                  //           '',
+                                  //       checkDate: _formatBookingDate(
+                                  //         _selectedBookingDate!,
+                                  //       ),
+                                  //       fromTime: _formatBookingTime(
+                                  //         context,
+                                  //         _selectedFromBookingTime!,
+                                  //       ),
+                                  //       toTime: _formatBookingTime(
+                                  //         context,
+                                  //         _selectedToBookingTime!,
+                                  //       ),
+                                  //     );
+
+                                  // if (!mounted) return;
+                                  // if (isAvailable) {
+                                  //   Navigator.pop(bottomSheetContext);
+                                  //   _goToMenuPage();
+                                  // }
+                                  Navigator.pop(bottomSheetContext);
+                                  _goToMenuPage();
+                                },
+                          child: isChecking
+                              ? const SizedBox(
+                                  height: 18,
+                                  width: 18,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                      AppColors.white,
+                                    ),
+                                  ),
+                                )
+                              : const Text('Continue'),
+                        ),
+                      );
+                    }),
                   ],
                 ),
               ),
@@ -555,15 +639,17 @@ class _ProductDetailsPageWidgetState extends State<ProductDetailsPageWidget> {
 
   Future<void> _pickBookingTime(
     BuildContext context, {
+    required TimeOfDay? selectedTime,
+    required void Function(TimeOfDay time) onTimeSelected,
     required VoidCallback onChanged,
   }) async {
     final pickedTime = await showTimePicker(
       context: context,
-      initialTime: _selectedBookingTime ?? TimeOfDay.now(),
+      initialTime: selectedTime ?? TimeOfDay.now(),
     );
 
     if (pickedTime != null) {
-      setState(() => _selectedBookingTime = pickedTime);
+      setState(() => onTimeSelected(pickedTime));
       onChanged();
     }
   }

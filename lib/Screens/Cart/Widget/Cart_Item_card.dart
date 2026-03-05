@@ -1,12 +1,15 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:foodyore/model/cart_model.dart';
 import 'package:foodyore/utils/Colors/AppColors.dart';
 import 'package:foodyore/utils/helpers/App_Content.dart';
 import 'package:foodyore/utils/helpers/Custom/Custom_dottedline.dart';
 import 'package:foodyore/utils/styles/Text_Styles.dart';
+import 'package:iconsax_flutter/iconsax_flutter.dart';
 
 class CartItemCard extends StatelessWidget {
   final bool isSelected;
+  final CartItem cartItem;
   final VoidCallback onToggle;
   final VoidCallback onIncrease;
   final VoidCallback onDecrease;
@@ -19,6 +22,7 @@ class CartItemCard extends StatelessWidget {
     required this.onIncrease,
     required this.onDecrease,
     required this.onRemove,
+    required this.cartItem,
   });
 
   @override
@@ -36,11 +40,22 @@ class CartItemCard extends StatelessWidget {
                 children: [
                   ClipRRect(
                     borderRadius: BorderRadius.circular(8),
-                    child: Image.asset(
-                      'assets/images/pre-wedding-shoot-in-lucknow.jpg',
+                    child: Image.network(
+                      cartItem.itemImage ?? '',
                       height: 70,
                       width: 70,
                       fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Container(
+                          height: 70,
+                          width: 70,
+                          color: AppColors.textHintColor.withOpacity(0.2),
+                          child: Icon(
+                            Iconsax.image_copy,
+                            color: AppColors.grey,
+                          ),
+                        );
+                      },
                     ),
                   ),
                   const SizedBox(width: 8),
@@ -66,7 +81,7 @@ class CartItemCard extends StatelessWidget {
                             ),
                             const SizedBox(width: 5),
                             Text(
-                              'ORD-123456',
+                              '#${cartItem.itemId ?? ''}',
                               style: AppTextStyles.bodySmall.copyWith(
                                 fontWeight: FontWeight.w600,
                                 fontFamily: AppFonts.regular,
@@ -86,7 +101,7 @@ class CartItemCard extends StatelessWidget {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          'Chicken Roti Rice sala unlimited with extra cheese and extra chicken pieces',
+                          cartItem.itemDetails ?? '',
                           maxLines: 3,
                           overflow: TextOverflow.ellipsis,
                           style: AppTextStyles.bodyMedium.copyWith(
@@ -111,7 +126,7 @@ class CartItemCard extends StatelessWidget {
                                   ),
                                 ),
                                 Text(
-                                  'Price : ${AppContent().moneySymbol}250/-',
+                                  'Price : ${AppContent().moneySymbol}${cartItem.price}/-',
                                   style: AppTextStyles.bodySmall.copyWith(
                                     color: AppColors.grey,
                                     fontFamily: AppFonts.regular,
@@ -123,6 +138,7 @@ class CartItemCard extends StatelessWidget {
                             _QtySelector(
                               onIncrease: onIncrease,
                               onDecrease: onDecrease,
+                              qty: '${cartItem.quantity ?? ''}',
                             ),
                           ],
                         ),
@@ -175,7 +191,7 @@ class CartItemCard extends StatelessWidget {
                 ),
               ),
               Text(
-                '${AppContent().moneySymbol}250/-',
+                '${AppContent().moneySymbol}${cartItem.lineTotal}/-',
                 style: AppTextStyles.bodyMedium.copyWith(
                   fontWeight: FontWeight.w700,
                   fontFamily: AppFonts.regular,
@@ -193,8 +209,12 @@ class CartItemCard extends StatelessWidget {
 class _QtySelector extends StatelessWidget {
   final VoidCallback onIncrease;
   final VoidCallback onDecrease;
-
-  const _QtySelector({required this.onIncrease, required this.onDecrease});
+  final String qty;
+  _QtySelector({
+    required this.onIncrease,
+    required this.onDecrease,
+    required this.qty,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -213,7 +233,7 @@ class _QtySelector extends StatelessWidget {
             child: Icon(Icons.remove, color: AppColors.primaryColor),
           ),
           Text(
-            '1',
+            qty,
             style: AppTextStyles.bodyMedium.copyWith(
               fontWeight: FontWeight.w600,
               fontFamily: AppFonts.regular,

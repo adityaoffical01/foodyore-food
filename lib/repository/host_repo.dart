@@ -19,4 +19,9 @@ class HostRepo {
     dynamic response = await _apiService.postApi(data, urls);
     return response;
   }
+
+  Future<dynamic> checkAvailability(String urls) async {
+    dynamic response = await _apiService.getApi(urls);
+    return response;
+  }
 }
