@@ -167,10 +167,12 @@ class AuthController extends GetxController {
 
   // for get profile
   Future<bool> getProfile(String userId) async {
+    print("user profile erro $userId");
     if (userId.trim().isEmpty) {
       return false;
     }
     try {
+         print("user profile erro1");
       isProfileLoading.value = true;
       profileResponse.value = ApiResponse.loading();
 
@@ -187,6 +189,7 @@ class AuthController extends GetxController {
       AppUtils.instance.snackBar("Error", message, true);
       return false;
     } catch (e) {
+      print("user profile erro2");
       final message = e.toString();
       profileResponse.value = ApiResponse.error(message);
       AppUtils.instance.snackBar("Error", message, true);

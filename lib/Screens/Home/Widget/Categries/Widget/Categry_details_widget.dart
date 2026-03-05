@@ -3,6 +3,7 @@ import 'package:foodyore/Screens/Home/Products/Product_Details_Page.dart';
 import 'package:foodyore/Screens/Home/Widget/Categries/Widget/category_card_widget.dart';
 import 'package:foodyore/Screens/Home/Widget/Categries/Widget/choose_yore_destination.dart';
 import 'package:foodyore/controller/category_controller.dart';
+
 import 'package:foodyore/data/response/api_status.dart';
 import 'package:foodyore/model/category_model.dart';
 import 'package:foodyore/utils/Colors/AppColors.dart';
@@ -21,6 +22,7 @@ class CategryDetailsWidget extends StatefulWidget {
 
 class _CategryDetailsWidgetState extends State<CategryDetailsWidget> {
   final CategoryController categoryController = Get.find<CategoryController>();
+
   final ScrollController _scrollController = ScrollController();
 
   @override
@@ -112,14 +114,37 @@ class _CategryDetailsWidgetState extends State<CategryDetailsWidget> {
                                   ),
                                 );
                               } else {
-                                Get.to(
-                                  ProductDetailsPageWidget(
-                                    cattId: item.categoryID.toString(),
-                                    hostId: item.hostID.toString(),
-                                    subCatId: item.subCategoryID.toString(),
-                                    locationId: item.locationID.toString(),
-                                  ),
-                                );
+                                categoryController
+                                    .fetchFarmlandSubCate(
+                                      context: context,
+                                      cateID: item.categoryID ?? "",
+                                      subCateID: item.subCategoryID ?? '',
+                                      hostId: item.hostID ?? '',
+                                    )
+                                    .then((isCate) {
+                                      if (isCate) {
+                                        Get.to(
+                                          ProductDetailsPageWidget(
+                                            cattId: item.categoryID.toString(),
+                                            hostId: item.hostID.toString(),
+                                            subCatId: item.subCategoryID
+                                                .toString(),
+                                            // locationId: item.locationID
+                                            //     .toString(),
+                                            descriptionId: '',
+                                          ),
+                                        );
+                                      }
+                                    });
+                                // Get.to(
+                                //   ProductDetailsPageWidget(
+                                //     cattId: item.categoryID.toString(),
+                                //     hostId: item.hostID.toString(),
+                                //     subCatId: item.subCategoryID.toString(),
+                                //     locationId: item.locationID.toString(),
+
+                                //   ),
+                                // );
                               }
                             },
                             child: categoryCard(

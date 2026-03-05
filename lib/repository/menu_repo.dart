@@ -1,0 +1,21 @@
+import 'package:foodyore/data/network/network_api_services.dart';
+import 'package:foodyore/model/menu_model.dart';
+
+class MenuRepo {
+  final _apiService = NetworkApiServices();
+
+  Future<MenuResponceModel> getMenuData(String urls) async {
+    dynamic response = await _apiService.getApi(urls);
+    return MenuResponceModel.fromJson(response);
+  }
+
+  // Future<AmenitiesListModel> getAniData(String urls) async {
+  //   dynamic response = await _apiService.getApi(urls);
+  //   return AmenitiesListModel.fromJson(response);
+  // }
+
+  Future<dynamic> postData(String urls, var data) async {
+    dynamic response = await _apiService.postApi(data, urls);
+    return response;
+  }
+}

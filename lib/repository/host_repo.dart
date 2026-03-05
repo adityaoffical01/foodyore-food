@@ -1,4 +1,3 @@
-
 import 'package:foodyore/data/network/network_api_services.dart';
 import 'package:foodyore/model/amenities_list_model.dart';
 import 'package:foodyore/model/host_descripetions_model.dart';
@@ -10,7 +9,8 @@ class HostRepo {
     dynamic response = await _apiService.getApi(urls);
     return HostDescripetionsModel.fromJson(response);
   }
-   Future<AmenitiesListModel> getAniData(String urls) async {
+
+  Future<AmenitiesListModel> getAniData(String urls) async {
     dynamic response = await _apiService.getApi(urls);
     return AmenitiesListModel.fromJson(response);
   }
@@ -20,5 +20,8 @@ class HostRepo {
     return response;
   }
 
-
+  Future<dynamic> checkAvailability(String urls) async {
+    dynamic response = await _apiService.getApi(urls);
+    return response;
+  }
 }

@@ -1,16 +1,18 @@
 import 'package:foodyore/Auth/Controller/Auth_Controller.dart';
-import 'package:foodyore/controller/cart_payment_controller.dart';
+import 'package:foodyore/controller/Menu_Controller.dart';
+import 'package:foodyore/controller/cart_controller.dart';
 import 'package:foodyore/controller/category_controller.dart';
 import 'package:foodyore/controller/home_gallery_controller.dart';
-import 'package:foodyore/controller/host_descriptions_controlller.dart';
+import 'package:foodyore/controller/order_controller.dart';
 import 'package:get/get.dart';
 
 Future<Map<String, Map<String, String>>> init() async {
   Get.lazyPut(() => AuthController());
   Get.lazyPut(() => CategoryController());
   Get.lazyPut(() => HomeGalleryController());
-  Get.lazyPut(() => HostDescriptionsControlller());
-  Get.lazyPut(() => CartPaymentController());
+  Get.lazyPut(() => MenuItemController());
+  Get.lazyPut(() => CartController());
+  Get.lazyPut(()=>OrderController());
 
   Map<String, Map<String, String>> language = {};
   return language;
