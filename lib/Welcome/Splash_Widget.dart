@@ -3,7 +3,6 @@
 import 'package:foodyore/Screens/Home/Home_Screen.dart';
 import 'package:foodyore/Welcome/Introduction_widget.dart';
 import 'package:foodyore/services/app_config.dart';
-import 'package:foodyore/services/auth.dart';
 import 'package:foodyore/utils/Colors/AppColors.dart';
 import 'package:flutter/material.dart';
 

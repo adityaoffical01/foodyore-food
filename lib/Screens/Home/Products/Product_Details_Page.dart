@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:foodyore/controller/host_descriptions_controlller.dart';
 import 'package:foodyore/data/response/api_status.dart';
 import 'package:foodyore/model/amenities_list_model.dart';
-import 'package:foodyore/res/app_urls.dart';
 import 'package:foodyore/utils/helpers/Custom/Custom_Loder.dart';
 import 'package:get/get.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';

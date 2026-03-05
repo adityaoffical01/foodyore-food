@@ -1,7 +1,7 @@
-// ignore_for_file: deprecated_member_use
-
+// ignore_for_file: deprecated_member_use 
 import 'package:flutter/material.dart';
 import 'package:foodyore/Screens/Cart/Widget/Cart_Item_card.dart';
+import 'package:foodyore/controller/cart_payment_controller.dart';
 import 'package:foodyore/utils/Colors/AppColors.dart';
 import 'package:foodyore/utils/helpers/App_Content.dart';
 import 'package:foodyore/utils/helpers/Custom/Custom_AppBar.dart';
@@ -9,6 +9,7 @@ import 'package:foodyore/utils/helpers/Custom/Custom_butoons.dart';
 import 'package:foodyore/utils/helpers/Custom/Custom_dottedline.dart';
 import 'package:foodyore/utils/helpers/Custom/Custom_screen_background.dart';
 import 'package:foodyore/utils/styles/Text_Styles.dart';
+import 'package:get/get.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 
 class CartWidget extends StatefulWidget {
@@ -21,6 +22,10 @@ class CartWidget extends StatefulWidget {
 class _CartWidgetState extends State<CartWidget> {
   bool isAllSelected = true;
   bool isItemSelected = true;
+  final CartPaymentController _paymentController =
+      Get.find<CartPaymentController>();
+  static const double _totalAmount = 290.0;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -327,7 +332,7 @@ class _CartWidgetState extends State<CartWidget> {
                           ),
                         ),
                         Text(
-                          '${AppContent().moneySymbol} 290.0/-',
+                          '${AppContent().moneySymbol} $_totalAmount/-',
                           style: AppTextStyles.bodyMedium.copyWith(
                             color: AppColors.textPrimary,
                             fontFamily: AppFonts.regular,
@@ -361,7 +366,7 @@ class _CartWidgetState extends State<CartWidget> {
                     ),
                   ),
                   Text(
-                    '${AppContent().moneySymbol}290/-',
+                    '${AppContent().moneySymbol}$_totalAmount/-',
                     style: AppTextStyles.bodyMedium.copyWith(
                       color: AppColors.white,
                       fontFamily: AppFonts.regular,
@@ -372,13 +377,23 @@ class _CartWidgetState extends State<CartWidget> {
               ),
             ),
             Expanded(
-              child: CustomButton(
-                horizontal: 0,
-                raduis: 8.0,
-                color: AppColors.white,
-                tittleColor: AppColors.primaryColor,
-                title: 'Pay Now',
-                onPressed: () {},
+              child: GetBuilder<CartPaymentController>(
+                builder: (controller) {
+                  final isBusy = controller.isPaying.value;
+                  return CustomButton(
+                    horizontal: 0,
+                    raduis: 8.0,
+                    color: AppColors.white,
+                    tittleColor: AppColors.primaryColor,
+                    title: 'Pay Now',
+                    isLoading: isBusy,
+                    onPressed: isBusy
+                        ? () {}
+                        : () => _paymentController.payNow(
+                            totalAmount: _totalAmount,
+                          ),
+                  );
+                },
               ),
             ),
           ],

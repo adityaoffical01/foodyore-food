@@ -9,12 +9,17 @@ class AppUrl {
   static String login_user(String user_id) => '$baseSlugUrl/users/$user_id';
   // for home
   static const String homeGalleryUrls = '$baseSlugUrl/home/gallery';
-  static const String getHostDecyUrls = '$baseSlugUrl/products/host-descriptions/';
+  static const String getHostDecyUrls =
+      '$baseSlugUrl/products/host-descriptions/';
   static const String getAmenitiesyUrls = '$baseSlugUrl/products/amenities?';
+  static const String createCcAvenueSession =
+      '$baseSlugUrl/payments/ccavenue/init';
+  static const String verifyCcAvenueOrder =
+      '$baseSlugUrl/payments/ccavenue/verify';
 
-
-  // check date 
-  static const String checkavailabilityMaster = '$baseSlugUrl/host/availability-masters?';
+  // check date
+  static const String checkavailabilityMaster =
+      '$baseSlugUrl/host/availability-masters?';
 
   // for products
   static const String categroryUrls = '$baseSlugUrl/products/categories';
