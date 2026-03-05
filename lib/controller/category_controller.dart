@@ -231,6 +231,7 @@ class CategoryController extends GetxController {
     required String subCatId,
     required String hostId,
     String? locationId = '',
+    required   String userMachine,
   }) async {
     try {
       amenitiesData.value = ApiResponse.loading();
@@ -241,6 +242,7 @@ class CategoryController extends GetxController {
           '&subCategoryId=$subCatId'
           '&hostId=$hostId'
           '&locationId=$locationId'
+          '&userMachine=$userMachine'
           '&limit=10';
 
       final response = await _hostRepo.getAniData(url);

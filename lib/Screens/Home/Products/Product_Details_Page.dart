@@ -56,7 +56,7 @@ class _ProductDetailsPageWidgetState extends State<ProductDetailsPageWidget> {
       context: context,
       catId: widget.cattId,
       subCatId: widget.subCatId,
-      hostId: widget.hostId,
+      hostId: widget.hostId, userMachine: '',
     );
   }
 

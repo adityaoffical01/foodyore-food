@@ -12,6 +12,7 @@ import 'package:foodyore/data/response/api_status.dart';
 import 'package:foodyore/model/amenities_list_model.dart';
 import 'package:foodyore/model/menu_model.dart';
 import 'package:foodyore/res/app_urls.dart';
+import 'package:foodyore/services/device_id_services.dart';
 import 'package:foodyore/utils/Colors/AppColors.dart';
 import 'package:foodyore/utils/helpers/App_Content.dart';
 import 'package:foodyore/utils/helpers/Custom/Custom_AppBar.dart';
@@ -66,6 +67,7 @@ class _MenuItemWidgetState extends State<MenuItemWidget> {
       subCatId: widget.subCategoryId,
       hostId: widget.hostId,
       locationId: widget.locationId,
+      userMachine: '',
     );
   }
 
@@ -300,14 +302,15 @@ class _MenuItemWidgetState extends State<MenuItemWidget> {
                           quantity: item.unit.toString(),
                         )
                         .then((isAdd) async {
-                          print('aditya_is_add: ${isAdd}');
                           if (isAdd == true) {
+                            final deviceId = await DeviceService.getDeviceId();
                             await _categoryController.fetchAmenitiesData(
                               context: context,
                               catId: widget.categoryId,
                               subCatId: widget.subCategoryId,
                               hostId: widget.hostId,
                               locationId: widget.locationId,
+                              userMachine: deviceId,
                             );
                           }
                         });
