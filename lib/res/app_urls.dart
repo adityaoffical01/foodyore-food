@@ -15,6 +15,9 @@ class AppUrl {
 
   // for products
   static const String categroryUrls = '$baseSlugUrl/products/categories';
+
+  static const String contact_us_URL = '$baseSlugUrl/engagement/contact';
+
   // for sub categroy
   static String subCategoryUrls(String categoryId, [String cursor = '']) {
     final String base =
