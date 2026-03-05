@@ -3,6 +3,7 @@ import 'package:foodyore/controller/Menu_Controller.dart';
 import 'package:foodyore/controller/cart_controller.dart';
 import 'package:foodyore/controller/category_controller.dart';
 import 'package:foodyore/controller/home_gallery_controller.dart';
+import 'package:foodyore/controller/order_controller.dart';
 import 'package:get/get.dart';
 
 Future<Map<String, Map<String, String>>> init() async {
@@ -11,6 +12,7 @@ Future<Map<String, Map<String, String>>> init() async {
   Get.lazyPut(() => HomeGalleryController());
   Get.lazyPut(() => MenuItemController());
   Get.lazyPut(() => CartController());
+  Get.lazyPut(()=>OrderController());
 
   Map<String, Map<String, String>> language = {};
   return language;

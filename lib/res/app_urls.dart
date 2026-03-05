@@ -33,6 +33,10 @@ class AppUrl {
 
   // for cart items
   static const String cart_URL = '$baseSlugUrl/cart';
+  static const String put_cart_URL = '$baseSlugUrl/cart/';
+  static const String remove_cart_URL = '$baseSlugUrl/cart/';
+  static const String clear_cart_URL = '$baseSlugUrl/cart/';
+  static const String create_order_URL = '$baseSlugUrl/orders';
 
   static String get_cart_urls(String userMachine) =>
       '$baseSlugUrl/cart?userMachine=$userMachine';

@@ -19,4 +19,15 @@ class CartRepo {
     dynamic response = await _apiService.postApi(data, urls);
     return response;
   }
+
+   Future<dynamic> putData(String urls, var data) async {
+
+    dynamic response = await _apiService.putApi(data, urls);
+    return response;
+  }
+  Future<dynamic> deleteData(String urls, ) async {
+    
+    dynamic response = await _apiService.deleteApi(urls);
+    return response;
+  }
 }

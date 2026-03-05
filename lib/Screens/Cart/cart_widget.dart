@@ -1,11 +1,13 @@
-// ignore_for_file: deprecated_member_use
+
 
 import 'package:flutter/material.dart';
+import 'package:foodyore/Auth/Controller/Auth_Controller.dart';
 import 'package:foodyore/Screens/Cart/Widget/Cart_Item_card.dart';
 import 'package:foodyore/controller/cart_controller.dart';
+import 'package:foodyore/controller/order_controller.dart';
 import 'package:foodyore/data/response/api_status.dart';
 import 'package:foodyore/model/cart_model.dart';
-import 'package:foodyore/services/device_id_services.dart';
+import 'package:foodyore/services/app_config.dart';
 import 'package:foodyore/utils/Colors/AppColors.dart';
 import 'package:foodyore/utils/helpers/App_Content.dart';
 import 'package:foodyore/utils/helpers/Custom/Custom_AppBar.dart';
@@ -27,15 +29,29 @@ class CartWidget extends StatefulWidget {
 class _CartWidgetState extends State<CartWidget> {
   bool isAllSelected = true;
   bool isItemSelected = true;
-  final CartController _cartController = Get.put(CartController());
+  final CartController _cartController = Get.isRegistered<CartController>()
+      ? Get.find<CartController>()
+      : Get.put(CartController());
+  final OrderController _orderController = Get.put(OrderController());
   @override
   void initState() {
     super.initState();
-    getCartData();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        getCartData();
+        Get.find<AuthController>().getProfile(userId);
+      }
+    });
   }
 
-  void getCartData() async {
-    await _cartController.fetchCartItems();
+  Future<void> getCartData() async => _cartController.fetchCartItems();
+
+  // Update select all functionality
+  void _updateSelectAll(bool? value) {
+    setState(() {
+      isAllSelected = value ?? false;
+      isItemSelected = value ?? false;
+    });
   }
 
   @override
@@ -46,7 +62,7 @@ class _CartWidgetState extends State<CartWidget> {
       body: CustomBackground(
         child: RefreshIndicator(
           onRefresh: () async {
-            getCartData();
+            await getCartData();
           },
           child: SingleChildScrollView(
             physics: AlwaysScrollableScrollPhysics(),
@@ -64,11 +80,13 @@ class _CartWidgetState extends State<CartWidget> {
               } else {
                 final cartItems =
                     _cartController.cartData.value.data?.data ?? [];
+                final selectedCount = isAllSelected ? cartItems.length : (isItemSelected ? 1 : 0);
+                
                 return Column(
                   spacing: 2,
                   children: [
                     SizedBox(height: 10),
-                    _cartHeder(),
+                    _cartHeder(selectedCount: selectedCount, totalItems: cartItems.length),
                     // for location discription
                     _LocationDiscription(),
                     // for cart items card
@@ -91,50 +109,114 @@ class _CartWidgetState extends State<CartWidget> {
           ),
         ),
       ),
-      bottomSheet: Container(
-        height: 80,
-        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        decoration: BoxDecoration(color: AppColors.primaryColor),
-        child: Row(
-          // mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Expanded(
-              child: Column(
-                children: [
-                  Text(
-                    'Total Amount',
-                    style: AppTextStyles.bodyMedium.copyWith(
-                      color: AppColors.backgroundColor,
-                    ),
-                  ),
-                  Text(
-                    '${AppContent().moneySymbol}290/-',
-                    style: AppTextStyles.bodyMedium.copyWith(
-                      color: AppColors.white,
-                      fontFamily: AppFonts.regular,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Expanded(
-              child: CustomButton(
-                horizontal: 0,
-                raduis: 8.0,
-                color: AppColors.white,
-                tittleColor: AppColors.primaryColor,
-                title: 'Pay Now',
-                onPressed: () {},
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+   bottomSheet: Obx(() {
+  final total = _cartController
+          .cartData.value.data?.priceBreakup?.totalAmount ??
+      0;
+ 
+  // Check if cart is empty
+  final cartItems = _cartController.cartData.value.data?.data ?? [];
+  final bool isCartEmpty = cartItems.isEmpty;
 
-  Widget _cartHeder() {
+  return Container(
+    height: 80,
+    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+    decoration: BoxDecoration(color: AppColors.primaryColor),
+    child: Row(
+      children: [
+        Expanded(
+          child: Column(
+            children: [
+              Text(
+                'Total Amount',
+                style: AppTextStyles.bodyMedium.copyWith(
+                  color: AppColors.backgroundColor,
+                ),
+              ),
+              Text(
+                '${AppContent().moneySymbol}$total/-',
+                style: AppTextStyles.bodyMedium.copyWith(
+                  color: AppColors.white,
+                  fontFamily: AppFonts.regular,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+        ),
+         Expanded(
+          child: _orderController.isPlacingOrder.value
+              ? Center(
+                  child: CircularProgressIndicator(
+                    color: AppColors.white,
+                  ),
+                )
+              : CustomButton(
+                  horizontal: 0,
+                  raduis: 8.0,
+                  color: isCartEmpty 
+                      ? AppColors.grey.withOpacity(0.5) 
+                      : AppColors.white,
+                  tittleColor: isCartEmpty 
+                      ? AppColors.white 
+                      : AppColors.primaryColor,
+                  title: 'Pay Now',
+                  onPressed: isCartEmpty 
+                      ? (){} 
+                      : () {
+                          _showPaymentOptionsDialog();
+                        },
+                ),
+        ),
+      ],
+    ),
+  );
+}),);
+  }
+void _showPaymentOptionsDialog() {
+  Get.dialog(
+    AlertDialog(
+      title: Text('Select Payment Method'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ListTile(
+            leading: Icon(Icons.payment, color: AppColors.primaryColor),
+            title: Text('Online Payment'),
+            onTap: () {
+              Get.back();
+              _placeOrder(paymentType: 'Online');
+            },
+          ),
+          ListTile(
+            leading: Icon(Icons.money, color: AppColors.primaryColor),
+            title: Text('Cash on Delivery'),
+            onTap: () {
+              Get.back();
+              _placeOrder(paymentType: 'COD');
+            },
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Get.back(),
+          child: Text('Cancel'),
+        ),
+      ],
+    ),
+  );
+}
+
+// Place order method
+void _placeOrder({required String paymentType}) {
+  _orderController.placeOrder(
+    paymentType: paymentType,
+    promoCode: '', // Empty as per requirement
+    visitTime: '', // Optional
+  );
+}
+  Widget _cartHeder({required int selectedCount, required int totalItems}) {
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 16.0),
       padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
@@ -147,16 +229,11 @@ class _CartWidgetState extends State<CartWidget> {
           Checkbox(
             value: isAllSelected,
             activeColor: AppColors.primaryColor,
-            onChanged: (value) {
-              setState(() {
-                isAllSelected = value!;
-                isItemSelected = value;
-              });
-            },
+            onChanged: _updateSelectAll,
             visualDensity: VisualDensity(horizontal: -4, vertical: -4),
           ),
           Text(
-            '2/2 ITEMS SELECTED ',
+            '$selectedCount/$totalItems ITEMS SELECTED ',
             style: AppTextStyles.bodySmall.copyWith(
               color: AppColors.black,
               fontFamily: AppFonts.regular,
@@ -166,10 +243,7 @@ class _CartWidgetState extends State<CartWidget> {
           Spacer(),
           GestureDetector(
             onTap: () {
-              showCustomSnackBar(
-                message: 'Clear all items from cart',
-                isError: true,
-              );
+              _showClearCartDialog();
             },
             child: Icon(Iconsax.trash_copy, size: 22.0, color: AppColors.red),
           ),
@@ -228,29 +302,40 @@ class _CartWidgetState extends State<CartWidget> {
       physics: const NeverScrollableScrollPhysics(),
       itemCount: cartItems.length,
       itemBuilder: (context, index) {
+        final item = cartItems[index];
         return CartItemCard(
           isSelected: isItemSelected,
           onToggle: () {
             setState(() {
               isItemSelected = !isItemSelected;
+              if (!isItemSelected) {
+                isAllSelected = false;
+              }
             });
           },
           onIncrease: () {
-            showCustomSnackBar(
-              message: 'Increase item quantity',
-              isError: false,
+              int currentQty = item.quantity ?? 1;
+            _cartController.updateCartItemQuantity(
+              cartItemId: item.cartId.toString(),
+              newQuantity: currentQty + 1,
             );
           },
           onDecrease: () {
-            showCustomSnackBar(
-              message: 'Decrease item quantity',
-              isError: false,
-            );
+             int currentQty = item.quantity ?? 1;
+            if (currentQty > 1) {
+              _cartController.updateCartItemQuantity(
+                cartItemId: item.cartId.toString(),
+                newQuantity: currentQty - 1,
+              );
+            } else {
+              // If quantity is 1, remove the item on decrease
+              _showRemoveItemDialog(item.cartId.toString());
+            }
           },
           onRemove: () {
-            showCustomSnackBar(message: 'Item removed', isError: true);
+            _showRemoveItemDialog(item.cartId.toString());
           },
-          cartItem: cartItems[index],
+          cartItem: item,
         );
       },
       separatorBuilder: (context, index) => const SizedBox(height: 2),
@@ -277,7 +362,6 @@ class _CartWidgetState extends State<CartWidget> {
               fontWeight: FontWeight.bold,
               fontFamily: AppFonts.regular,
               color: const Color.fromARGB(255, 15, 117, 15),
-              // fontSize: 11.0,
             ),
           ),
         ],
@@ -424,6 +508,62 @@ class _CartWidgetState extends State<CartWidget> {
                 ),
               ),
             ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Show dialog for removing single item
+  void _showRemoveItemDialog(String cartItemId) {
+    print("object");
+     if (_cartController.isLoading.value) return;
+
+  if (Get.isDialogOpen ?? false) {
+    Get.back();
+  }
+
+    Get.dialog(
+      AlertDialog(
+        title: Text('Remove Item'),
+        content: Text('Are you sure you want to remove this item?'),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(),
+            child: Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () async {
+              await _cartController.removeCartItem(cartItemId: cartItemId);
+              Get.back();
+
+            },
+            child: Text('Remove', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Show dialog for clearing entire cart
+  void _showClearCartDialog() {
+    if (Get.isDialogOpen ?? false) return;
+    if (_cartController.isLoading.value) return;
+    Get.dialog(
+      AlertDialog(
+        title: Text('Clear Cart'),
+        content: Text('Are you sure you want to clear all items?'),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(),
+            child: Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () async {
+              Get.back();
+              await _cartController.clearCart();
+            },
+            child: Text('Clear', style: TextStyle(color: Colors.red)),
           ),
         ],
       ),
