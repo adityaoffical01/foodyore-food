@@ -42,9 +42,18 @@ class AppUrl {
   static const String create_order_URL = '$baseSlugUrl/orders';
   static String get_order_history_URL(String customerId) =>
       '$baseSlugUrl/orders?customerId=$customerId';
+  static String get_order_details_URL(String orderId) =>
+      '$baseSlugUrl/orders/$orderId';
 
   static String get_cart_urls(String userMachine) =>
       '$baseSlugUrl/cart?userMachine=$userMachine';
+
+  static String search_city_URL(String city) => Uri.parse(
+    '$baseSlugUrl/locations/search',
+  ).replace(queryParameters: {'city': city}).toString();
+
+  static String city_subcategories_URL(String cityId) =>
+      '$baseSlugUrl/locations/cities/$cityId/subcategories';
 
   static String checkAvailabilityUrl({
     required String locationId,

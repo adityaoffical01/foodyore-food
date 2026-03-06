@@ -30,6 +30,8 @@ class SubCategoryResponseModel {
 class SubCategoryItem {
   final String? subCategoryID;
   final String? categoryID;
+  final String? cityID;
+  final String? categoryName;
   final String? subCategoryName;
   final String? status;
   final String? hostID;
@@ -48,6 +50,8 @@ class SubCategoryItem {
   SubCategoryItem({
     this.subCategoryID,
     this.categoryID,
+    this.cityID,
+    this.categoryName,
     this.subCategoryName,
     this.status,
     this.hostID,
@@ -68,6 +72,8 @@ class SubCategoryItem {
     return SubCategoryItem(
       subCategoryID: json["SubCategoryID"]?.toString(),
       categoryID: json["CategoryID"]?.toString(),
+      cityID: json["CityID"]?.toString(),
+      categoryName: json["CategoryName"]?.toString(),
       subCategoryName: json["SubCategoryName"]?.toString(),
       status: json["Status"]?.toString(),
       hostID: json["HostID"]?.toString(),
@@ -93,6 +99,8 @@ class SubCategoryItem {
     return {
       "SubCategoryID": subCategoryID,
       "CategoryID": categoryID,
+      "CityID": cityID,
+      "CategoryName": categoryName,
       "SubCategoryName": subCategoryName,
       "Status": status,
       "HostID": hostID,

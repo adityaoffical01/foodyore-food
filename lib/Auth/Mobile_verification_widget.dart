@@ -171,7 +171,7 @@ class MobileVerificationWidget extends StatelessWidget {
             ),
             recognizer: TapGestureRecognizer()
               ..onTap = () {
-                openTerms(url: AppContent().termsAndConditionsUrl);
+                openUrls(url: AppContent().termsAndConditionsUrl);
               },
           ),
         ],

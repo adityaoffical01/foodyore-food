@@ -1,7 +1,10 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:foodyore/utils/Colors/AppColors.dart';
 import 'package:get/get.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'package:intl/intl.dart';
 
@@ -215,6 +218,45 @@ class AppUtils {
           ),
         );
       }
+    }
+  }
+
+  Future<void> openDirections({
+    required double lat,
+    required double long,
+  }) async {
+    final Uri androidGoogleMapUri = Uri.parse(
+      'google.navigation:q=$lat,$long&mode=d',
+    );
+    final Uri iosAppleMapUri = Uri.parse('maps://?daddr=$lat,$long&dirflg=d');
+    final Uri webGoogleMapUri = Uri.parse(
+      'https://www.google.com/maps/dir/?api=1&destination=$lat,$long&travelmode=driving',
+    );
+
+    try {
+      if (Platform.isIOS) {
+        if (await canLaunchUrl(iosAppleMapUri)) {
+          await launchUrl(iosAppleMapUri, mode: LaunchMode.externalApplication);
+          return;
+        }
+      } else {
+        if (await canLaunchUrl(androidGoogleMapUri)) {
+          await launchUrl(
+            androidGoogleMapUri,
+            mode: LaunchMode.externalApplication,
+          );
+          return;
+        }
+      }
+
+      if (await canLaunchUrl(webGoogleMapUri)) {
+        await launchUrl(webGoogleMapUri, mode: LaunchMode.externalApplication);
+        return;
+      }
+
+      showCustomSnackBar('Unable to open map application');
+    } catch (_) {
+      showCustomSnackBar('Unable to open map application');
     }
   }
 }

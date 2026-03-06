@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:foodyore/controller/contact_controller.dart';
 import 'package:foodyore/utils/Colors/AppColors.dart';
+import 'package:foodyore/utils/app_utils.dart';
 import 'package:foodyore/utils/helpers/App_Content.dart';
 import 'package:foodyore/utils/helpers/Custom/CustomInputField.dart';
 import 'package:foodyore/utils/helpers/Custom/Custom_AppBar.dart';
@@ -10,7 +11,7 @@ import 'package:get/get.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 
 class ContatctUsScreen extends StatelessWidget {
-  const ContatctUsScreen({Key? key}) : super(key: key);
+  const ContatctUsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +23,10 @@ class ContatctUsScreen extends StatelessWidget {
         children: [
           SingleChildScrollView(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 16.0,
+                vertical: 16.0,
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -59,20 +63,28 @@ class ContatctUsScreen extends StatelessWidget {
                           ),
                         ),
                       ),
-                      Container(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 16.0,
-                          vertical: 4.0,
-                        ),
-                        decoration: BoxDecoration(
-                          border: Border.all(color: AppColors.black),
-                          borderRadius: BorderRadius.circular(44.0),
-                        ),
-                        child: Text(
-                          'Direction'.toUpperCase(),
-                          style: AppTextStyles.bodySmall.copyWith(
-                            color: AppColors.black,
-                            fontWeight: FontWeight.bold,
+                      InkWell(
+                        onTap: () async {
+                          await AppUtils.instance.openDirections(
+                            lat: 27.017374,
+                            long: 80.851417,
+                          );
+                        },
+                        child: Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 16.0,
+                            vertical: 4.0,
+                          ),
+                          decoration: BoxDecoration(
+                            border: Border.all(color: AppColors.black),
+                            borderRadius: BorderRadius.circular(44.0),
+                          ),
+                          child: Text(
+                            'Direction'.toUpperCase(),
+                            style: AppTextStyles.bodySmall.copyWith(
+                              color: AppColors.black,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
                       ),

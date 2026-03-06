@@ -67,12 +67,11 @@ Drawer buildDrawer() {
           onTap: () => Get.to(PrivacyPolicyWidget()),
         ),
 
-        drawerItem(
-          icon: Iconsax.lock_1_copy,
-          title: 'Change Password',
-          onTap: () {},
-        ),
-
+        // drawerItem(
+        //   icon: Iconsax.lock_1_copy,
+        //   title: 'Change Password',
+        //   onTap: () {},
+        // ),
         drawerItem(
           icon: Iconsax.logout_copy,
           title: 'Logout',

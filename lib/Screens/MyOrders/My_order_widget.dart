@@ -78,11 +78,14 @@ class _MyOrderWidgetState extends State<MyOrderWidget> {
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
                   itemCount: orders.length,
+                  padding: EdgeInsets.symmetric(vertical: 14.0),
                   itemBuilder: (context, index) {
                     final item = orders[index];
                     return InkWell(
                       onTap: () {
-                        Get.to(() => OrderDetailsWidget());
+                        Get.to(
+                          () => OrderDetailsWidget(orderId: item.orderId ?? ''),
+                        );
                       },
                       child: OrderCard(
                         orderId: 'ORD - ${item.orderId}',
@@ -91,7 +94,6 @@ class _MyOrderWidgetState extends State<MyOrderWidget> {
                             item.orderStatus!.toLowerCase().contains('pending')
                             ? AppColors.orange
                             : const Color(0xFF146514),
-
                         location:
                             ((item.location?.address1)! +
                                     (item.location?.address2 ?? '') +

@@ -5,6 +5,8 @@ import 'package:foodyore/utils/helpers/App_Content.dart';
 import 'package:foodyore/utils/styles/Text_Styles.dart';
 
 class BecomeHostSection extends StatelessWidget {
+  const BecomeHostSection({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -46,7 +48,12 @@ class BecomeHostSection extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 12),
-          PrimaryButton('JOIN AS A HOST'),
+          PrimaryButton(
+            'JOIN AS A HOST',
+            onTap: () {
+              openUrls(url: AppContent().becomeahost);
+            },
+          ),
         ],
       ),
     );

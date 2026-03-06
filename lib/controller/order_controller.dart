@@ -1,8 +1,8 @@
-import 'dart:convert';
 
 import 'package:foodyore/Auth/Controller/Auth_Controller.dart';
 import 'package:foodyore/controller/cart_controller.dart';
 import 'package:foodyore/data/response/api_response.dart';
+import 'package:foodyore/model/Order_details_Model.dart';
 import 'package:foodyore/model/order_model.dart';
 import 'package:foodyore/repository/order_repo.dart';
 import 'package:foodyore/res/app_urls.dart';
@@ -16,9 +16,12 @@ class OrderController extends GetxController {
 
   RxBool isPlacingOrder = false.obs;
   RxBool isOrderHistoryLoading = false.obs;
+  RxBool isOrderDetailsLoading = false.obs;
 
   Rx<ApiResponse<OrderListResponseModel>> orderHistoryData =
       ApiResponse<OrderListResponseModel>.loading().obs;
+  Rx<ApiResponse<OrderDetailsResponseModel>> orderDetailsData =
+      ApiResponse<OrderDetailsResponseModel>.loading().obs;
 
   String _loggedInCustomerId() {
     try {
@@ -58,6 +61,35 @@ class OrderController extends GetxController {
       orderHistoryData.value = ApiResponse.error(e.toString());
     } finally {
       isOrderHistoryLoading.value = false;
+    }
+  }
+
+  /// GET ORDER DETAILS
+  Future<void> fetchOrderDetails({required String orderId}) async {
+    if (isOrderDetailsLoading.value) return;
+
+    final String resolvedOrderId = orderId.trim();
+
+    if (resolvedOrderId.isEmpty) {
+      orderDetailsData.value = ApiResponse.error(
+        'Order ID is required for order details',
+      );
+      return;
+    }
+
+    isOrderDetailsLoading.value = true;
+    orderDetailsData.value = ApiResponse.loading();
+
+    try {
+      final response = await _orderRepo.getOrderDetails(
+        AppUrl.get_order_details_URL(resolvedOrderId),
+      );
+      orderDetailsData.value = ApiResponse.completed(response);
+      print('aditya_order_details_response: ${response.toJson()}');
+    } catch (e) {
+      orderDetailsData.value = ApiResponse.error(e.toString());
+    } finally {
+      isOrderDetailsLoading.value = false;
     }
   }
 

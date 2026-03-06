@@ -1,11 +1,10 @@
+import 'package:foodyore/model/order_model.dart';
+
 class OrderDetailsResponseModel {
   final bool? success;
   final OrderDetailsDataModel? data;
 
-  const OrderDetailsResponseModel({
-    this.success,
-    this.data,
-  });
+  const OrderDetailsResponseModel({this.success, this.data});
 
   factory OrderDetailsResponseModel.fromJson(Map<String, dynamic> json) {
     return OrderDetailsResponseModel(
@@ -17,10 +16,7 @@ class OrderDetailsResponseModel {
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'success': success,
-      'data': data?.toJson(),
-    };
+    return {'success': success, 'data': data?.toJson()};
   }
 }
 
@@ -34,14 +30,14 @@ class OrderDetailsDataModel {
   final String? orderStartDate;
   final String? orderEndDate;
   final String? visitTime;
-  final OrderDetailsCustomerInfoModel? customerInfo;
-  final OrderDetailsHostInfoModel? hostInfo;
-  final OrderDetailsPaymentInfoModel? paymentInfo;
-  final OrderDetailsPriceBreakupModel? priceBreakup;
+  final OrderCustomerInfoModel? customerInfo;
+  final OrderHostInfoModel? hostInfo;
+  final OrderPaymentInfoModel? paymentInfo;
+  final OrderPriceBreakupModel? priceBreakup;
   final OrderDetailsItemSummaryModel? itemSummary;
   final List<OrderDetailsItemModel>? items;
   final String? locationId;
-  final OrderDetailsLocationModel? location;
+  final OrderLocationModel? location;
   final String? locationSummary;
 
   const OrderDetailsDataModel({
@@ -77,22 +73,22 @@ class OrderDetailsDataModel {
       orderEndDate: json['OrderEndDate']?.toString(),
       visitTime: json['VisitTime']?.toString(),
       customerInfo: json['customerInfo'] is Map<String, dynamic>
-          ? OrderDetailsCustomerInfoModel.fromJson(
+          ? OrderCustomerInfoModel.fromJson(
               json['customerInfo'] as Map<String, dynamic>,
             )
           : null,
       hostInfo: json['hostInfo'] is Map<String, dynamic>
-          ? OrderDetailsHostInfoModel.fromJson(
+          ? OrderHostInfoModel.fromJson(
               json['hostInfo'] as Map<String, dynamic>,
             )
           : null,
       paymentInfo: json['paymentInfo'] is Map<String, dynamic>
-          ? OrderDetailsPaymentInfoModel.fromJson(
+          ? OrderPaymentInfoModel.fromJson(
               json['paymentInfo'] as Map<String, dynamic>,
             )
           : null,
       priceBreakup: json['priceBreakup'] is Map<String, dynamic>
-          ? OrderDetailsPriceBreakupModel.fromJson(
+          ? OrderPriceBreakupModel.fromJson(
               json['priceBreakup'] as Map<String, dynamic>,
             )
           : null,
@@ -104,14 +100,15 @@ class OrderDetailsDataModel {
       items: json['items'] is List
           ? List<OrderDetailsItemModel>.from(
               (json['items'] as List).map(
-                (item) =>
-                    OrderDetailsItemModel.fromJson(item as Map<String, dynamic>),
+                (item) => OrderDetailsItemModel.fromJson(
+                  item as Map<String, dynamic>,
+                ),
               ),
             )
           : null,
       locationId: json['LocationID']?.toString(),
       location: json['Location'] is Map<String, dynamic>
-          ? OrderDetailsLocationModel.fromJson(
+          ? OrderLocationModel.fromJson(
               json['Location'] as Map<String, dynamic>,
             )
           : null,
@@ -143,150 +140,11 @@ class OrderDetailsDataModel {
   }
 }
 
-class OrderDetailsCustomerInfoModel {
-  final int? customerId;
-  final String? customerName;
-  final String? mobile;
-  final String? emailId;
-  final String? customerType;
-
-  const OrderDetailsCustomerInfoModel({
-    this.customerId,
-    this.customerName,
-    this.mobile,
-    this.emailId,
-    this.customerType,
-  });
-
-  factory OrderDetailsCustomerInfoModel.fromJson(Map<String, dynamic> json) {
-    return OrderDetailsCustomerInfoModel(
-      customerId: _toInt(json['CustomerID']),
-      customerName: json['CustomerName']?.toString(),
-      mobile: json['Mobile']?.toString(),
-      emailId: json['EmailID']?.toString(),
-      customerType: json['CustomerType']?.toString(),
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'CustomerID': customerId,
-      'CustomerName': customerName,
-      'Mobile': mobile,
-      'EmailID': emailId,
-      'CustomerType': customerType,
-    };
-  }
-}
-
-class OrderDetailsHostInfoModel {
-  final String? hostId;
-  final String? hostName;
-  final String? hostEmail;
-  final String? hostMobile;
-
-  const OrderDetailsHostInfoModel({
-    this.hostId,
-    this.hostName,
-    this.hostEmail,
-    this.hostMobile,
-  });
-
-  factory OrderDetailsHostInfoModel.fromJson(Map<String, dynamic> json) {
-    return OrderDetailsHostInfoModel(
-      hostId: json['HostID']?.toString(),
-      hostName: json['HostName']?.toString(),
-      hostEmail: json['HostEmail']?.toString(),
-      hostMobile: json['HostMobile']?.toString(),
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'HostID': hostId,
-      'HostName': hostName,
-      'HostEmail': hostEmail,
-      'HostMobile': hostMobile,
-    };
-  }
-}
-
-class OrderDetailsPaymentInfoModel {
-  final String? paymentType;
-  final String? paymentStatus;
-  final String? promoCode;
-
-  const OrderDetailsPaymentInfoModel({
-    this.paymentType,
-    this.paymentStatus,
-    this.promoCode,
-  });
-
-  factory OrderDetailsPaymentInfoModel.fromJson(Map<String, dynamic> json) {
-    return OrderDetailsPaymentInfoModel(
-      paymentType: json['PaymentType']?.toString(),
-      paymentStatus: json['PaymentStatus']?.toString(),
-      promoCode: json['PromoCode']?.toString(),
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'PaymentType': paymentType,
-      'PaymentStatus': paymentStatus,
-      'PromoCode': promoCode,
-    };
-  }
-}
-
-class OrderDetailsPriceBreakupModel {
-  final double? subTotal;
-  final double? cgstSgstTax;
-  final double? serviceTax;
-  final double? discountAmount;
-  final double? netAmount;
-  final double? totalAmount;
-
-  const OrderDetailsPriceBreakupModel({
-    this.subTotal,
-    this.cgstSgstTax,
-    this.serviceTax,
-    this.discountAmount,
-    this.netAmount,
-    this.totalAmount,
-  });
-
-  factory OrderDetailsPriceBreakupModel.fromJson(Map<String, dynamic> json) {
-    return OrderDetailsPriceBreakupModel(
-      subTotal: _toDouble(json['SubTotal']),
-      cgstSgstTax: _toDouble(json['CGST_SGST_Tax']),
-      serviceTax: _toDouble(json['ServiceTax']),
-      discountAmount: _toDouble(json['DiscountAmount']),
-      netAmount: _toDouble(json['NetAmount']),
-      totalAmount: _toDouble(json['TotalAmount']),
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'SubTotal': subTotal,
-      'CGST_SGST_Tax': cgstSgstTax,
-      'ServiceTax': serviceTax,
-      'DiscountAmount': discountAmount,
-      'NetAmount': netAmount,
-      'TotalAmount': totalAmount,
-    };
-  }
-}
-
 class OrderDetailsItemSummaryModel {
   final int? totalItems;
   final int? totalQuantity;
 
-  const OrderDetailsItemSummaryModel({
-    this.totalItems,
-    this.totalQuantity,
-  });
+  const OrderDetailsItemSummaryModel({this.totalItems, this.totalQuantity});
 
   factory OrderDetailsItemSummaryModel.fromJson(Map<String, dynamic> json) {
     return OrderDetailsItemSummaryModel(
@@ -296,10 +154,7 @@ class OrderDetailsItemSummaryModel {
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'TotalItems': totalItems,
-      'TotalQuantity': totalQuantity,
-    };
+    return {'TotalItems': totalItems, 'TotalQuantity': totalQuantity};
   }
 }
 
@@ -401,46 +256,6 @@ class OrderDetailsItemPriceBreakupModel {
       'NetAmount': netAmount,
       'DiscountAmount': discountAmount,
       'PayableAmount': payableAmount,
-    };
-  }
-}
-
-class OrderDetailsLocationModel {
-  final String? address1;
-  final String? address2;
-  final String? cityName;
-  final String? stateName;
-  final String? countryName;
-  final String? pinCode;
-
-  const OrderDetailsLocationModel({
-    this.address1,
-    this.address2,
-    this.cityName,
-    this.stateName,
-    this.countryName,
-    this.pinCode,
-  });
-
-  factory OrderDetailsLocationModel.fromJson(Map<String, dynamic> json) {
-    return OrderDetailsLocationModel(
-      address1: json['Address1']?.toString(),
-      address2: json['Address2']?.toString(),
-      cityName: json['CityName']?.toString(),
-      stateName: json['StateName']?.toString(),
-      countryName: json['CountryName']?.toString(),
-      pinCode: json['PinCode']?.toString(),
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'Address1': address1,
-      'Address2': address2,
-      'CityName': cityName,
-      'StateName': stateName,
-      'CountryName': countryName,
-      'PinCode': pinCode,
     };
   }
 }

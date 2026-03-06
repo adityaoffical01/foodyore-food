@@ -1,23 +1,31 @@
 // ignore_for_file: deprecated_member_use
 
 import 'package:flutter/material.dart';
+import 'package:foodyore/controller/order_controller.dart';
+import 'package:foodyore/data/response/api_status.dart';
+import 'package:foodyore/model/Order_details_Model.dart';
+import 'package:foodyore/model/order_model.dart';
 import 'package:foodyore/utils/Colors/AppColors.dart';
+import 'package:foodyore/utils/app_utils.dart';
 import 'package:foodyore/utils/helpers/App_Content.dart';
 import 'package:foodyore/utils/helpers/Custom/Custom_AppBar.dart';
+import 'package:foodyore/utils/helpers/Custom/Custom_Loder.dart';
 import 'package:foodyore/utils/helpers/Custom/Custom_dottedline.dart';
 import 'package:foodyore/utils/helpers/Custom/Custom_screen_background.dart';
 import 'package:foodyore/utils/styles/Text_Styles.dart';
+import 'package:get/get.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 
 class OrderDetailsWidget extends StatefulWidget {
-  const OrderDetailsWidget({super.key});
+  final String orderId;
+  const OrderDetailsWidget({super.key, required this.orderId});
 
   @override
   State<OrderDetailsWidget> createState() => _OrderDetailsWidgetState();
 }
 
 class _OrderDetailsWidgetState extends State<OrderDetailsWidget> {
-  static const int _itemCount = 2;
+  final OrderController _orderController = Get.put(OrderController());
   final Set<int> _expandedItemIndexes = <int>{};
 
   void _toggleItemDetails(int index) {
@@ -30,6 +38,12 @@ class _OrderDetailsWidgetState extends State<OrderDetailsWidget> {
     });
   }
 
+  @override
+  void initState() {
+    super.initState();
+    _orderController.fetchOrderDetails(orderId: widget.orderId);
+  }
+
   bool _isItemExpanded(int index) => _expandedItemIndexes.contains(index);
 
   @override
@@ -37,20 +51,59 @@ class _OrderDetailsWidgetState extends State<OrderDetailsWidget> {
     return Scaffold(
       appBar: CustomAppbar(title: 'Order Details'),
       body: CustomBackground(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
-            child: Column(
-              children: [
-                _orderSummary(),
-                _invoiceTo(),
-                _orderDetails(),
-                _paymentSummary(),
-                const SizedBox(height: 20),
-              ],
-            ),
-          ),
-        ),
+        child: Obx(() {
+          if (_orderController.isOrderDetailsLoading.value) {
+            return Center(child: CustomLoder(color: AppColors.primaryColor));
+          } else if (_orderController.orderDetailsData.value.status ==
+                  Status.ERROR ||
+              (_orderController
+                      .orderDetailsData
+                      .value
+                      .data
+                      ?.data
+                      ?.items
+                      ?.isEmpty ??
+                  true)) {
+            return Center(child: Text('no found data'));
+          } else {
+            final details = _orderController.orderDetailsData.value.data?.data;
+            return SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  vertical: 12,
+                  horizontal: 20,
+                ),
+                child: Column(
+                  children: [
+                    _orderSummary(
+                      orderId: details!.orderId.toString(),
+                      payStatus: details.paymentStatus.toString(),
+                      orderDate: details.createdDate.toString(),
+                      invoiceId: details.orderId.toString(),
+                      bookDate: details.orderDate.toString(),
+                      repotingTime: details.visitTime.toString(),
+                    ),
+                    _invoiceTo(
+                      custInfo: details.customerInfo,
+                      hostInfo: details.hostInfo,
+                      location: details.location,
+                    ),
+                    _orderDetails(
+                      details.items,
+                      '${details.priceBreakup?.totalAmount ?? '0'}',
+                    ),
+                    _paymentSummary(
+                      details.priceBreakup,
+                      details.paymentStatus ?? '',
+                      _getTotalGuests(details.items),
+                    ),
+                    const SizedBox(height: 20),
+                  ],
+                ),
+              ),
+            );
+          }
+        }),
       ),
     );
   }
@@ -111,7 +164,15 @@ class _OrderDetailsWidgetState extends State<OrderDetailsWidget> {
     );
   }
 
-  Widget _orderSummary() {
+  Widget _orderSummary({
+    required String orderId,
+    required String payStatus,
+
+    required String orderDate,
+    required String invoiceId,
+    required String bookDate,
+    required String repotingTime,
+  }) {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -129,7 +190,7 @@ class _OrderDetailsWidgetState extends State<OrderDetailsWidget> {
                 children: [
                   Text('Order Number', style: AppTextStyles.caption),
                   Text(
-                    'ORD - 123456',
+                    'ORD - $orderId',
                     style: AppTextStyles.bodyLarge.copyWith(
                       color: AppColors.black,
                       fontFamily: AppFonts.regular,
@@ -145,16 +206,20 @@ class _OrderDetailsWidgetState extends State<OrderDetailsWidget> {
                   vertical: 4,
                 ),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF146514).withOpacity(0.1),
+                  color: payStatus.toLowerCase() == 'paid'
+                      ? const Color(0xFF146514).withOpacity(0.1)
+                      : AppColors.orange.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
-                  'Paid',
+                  payStatus,
                   style: AppTextStyles.bodySmall.copyWith(
                     fontSize: 12,
                     fontWeight: FontWeight.bold,
                     fontFamily: AppFonts.regular,
-                    color: const Color(0xFF146514),
+                    color: payStatus.toLowerCase() == 'paid'
+                        ? const Color(0xFF146514)
+                        : AppColors.orange,
                   ),
                 ),
               ),
@@ -165,26 +230,30 @@ class _OrderDetailsWidgetState extends State<OrderDetailsWidget> {
           const SizedBox(height: 10),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: const [
+            children: [
               _SummaryMeta(
                 icon: Iconsax.document_1_copy,
                 title: 'Invoice ID',
-                value: 'FYD - 654321',
+                value: 'FYD - $invoiceId',
               ),
               _SummaryMeta(
                 icon: Iconsax.calendar_1_copy,
                 title: 'Order Date',
-                value: '05 Mar 2026',
+                value: AppUtils.instance.convertDateToDDMMMYYYYFormat(
+                  dateString: bookDate,
+                ),
               ),
               _SummaryMeta(
                 icon: Iconsax.timer_1_copy,
                 title: 'Booking Date',
-                value: '05 Mar 2026',
+                value: AppUtils.instance.convertDateToDDMMMYYYYFormat(
+                  dateString: orderDate,
+                ),
               ),
               _SummaryMeta(
                 icon: Iconsax.timer_1_copy,
                 title: 'Booking Time',
-                value: '12:00 PM',
+                value: repotingTime,
               ),
             ],
           ),
@@ -193,7 +262,18 @@ class _OrderDetailsWidgetState extends State<OrderDetailsWidget> {
     );
   }
 
-  Widget _invoiceTo() {
+  Widget _invoiceTo({
+    OrderCustomerInfoModel? custInfo,
+    OrderHostInfoModel? hostInfo,
+    OrderLocationModel? location,
+  }) {
+    final hostAddress = [
+      location?.address1,
+      location?.address2,
+      location?.cityName,
+      location?.pinCode,
+    ].where((value) => (value ?? '').trim().isNotEmpty).join(', ');
+
     return _sectionContainer(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -219,18 +299,18 @@ class _OrderDetailsWidgetState extends State<OrderDetailsWidget> {
             children: [
               Expanded(
                 child: _partyDetails(
-                  name: 'John Doe',
-                  address: '123 Main Street, City, Country',
-                  phone: '+1 234 567 890',
+                  name: custInfo?.customerName ?? 'Guest',
+                  address: custInfo?.emailId ?? 'address',
+                  phone: custInfo?.mobile ?? '+91 123456',
                   alignRight: false,
                 ),
               ),
               const SizedBox(width: 12),
               Expanded(
                 child: _partyDetails(
-                  name: 'Restaurant Name',
-                  address: '456 Restaurant Ave, City, Country',
-                  phone: '+1 987 654 321',
+                  name: hostInfo?.hostName ?? '-',
+                  address: hostAddress.isEmpty ? '-' : hostAddress,
+                  phone: hostInfo?.hostMobile ?? '-',
                   alignRight: true,
                 ),
               ),
@@ -297,7 +377,7 @@ class _OrderDetailsWidgetState extends State<OrderDetailsWidget> {
     );
   }
 
-  Widget _orderDetails() {
+  Widget _orderDetails(List<OrderDetailsItemModel>? orderItem, String total) {
     return _sectionContainer(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -320,7 +400,7 @@ class _OrderDetailsWidgetState extends State<OrderDetailsWidget> {
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
-                  '$_itemCount Items',
+                  '${orderItem?.length ?? 0} Items',
                   style: AppTextStyles.bodySmall.copyWith(
                     fontSize: 12,
                     fontWeight: FontWeight.bold,
@@ -335,13 +415,14 @@ class _OrderDetailsWidgetState extends State<OrderDetailsWidget> {
           CustomDottedDivider(color: AppColors.primaryColor.withOpacity(0.5)),
           ListView.builder(
             shrinkWrap: true,
-            itemCount: _itemCount,
+            itemCount: orderItem?.length ?? 0,
             physics: const NeverScrollableScrollPhysics(),
             padding: EdgeInsets.zero,
             itemBuilder: (context, index) {
+              final item = orderItem![index];
               return Padding(
                 padding: const EdgeInsets.symmetric(vertical: 12),
-                child: _orderItemCard(index),
+                child: _orderItemCard(index, item),
               );
             },
           ),
@@ -349,7 +430,7 @@ class _OrderDetailsWidgetState extends State<OrderDetailsWidget> {
           const SizedBox(height: 8),
           _keyValueRow(
             'Grand Total',
-            '500/-',
+            '${AppContent().moneySymbol}$total/-',
             boldLabel: true,
             boldValue: true,
           ),
@@ -358,18 +439,29 @@ class _OrderDetailsWidgetState extends State<OrderDetailsWidget> {
     );
   }
 
-  Widget _orderItemCard(int index) {
+  Widget _orderItemCard(int index, OrderDetailsItemModel item) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
 
       children: [
         ClipRRect(
           borderRadius: BorderRadius.circular(8),
-          child: Image.asset(
-            'assets/picture/bottom_background.jpg',
+          child: Image.network(
+            item.itemImage ?? '',
             width: 60,
             height: 60,
             fit: BoxFit.cover,
+            errorBuilder: (context, error, stackTrace) {
+              return Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(8),
+                  color: AppColors.textHintColor.withOpacity(0.2),
+                ),
+                width: 60,
+                height: 60,
+                child: Icon(Iconsax.image_copy, color: AppColors.grey),
+              );
+            },
           ),
         ),
         const SizedBox(width: 8),
@@ -378,7 +470,7 @@ class _OrderDetailsWidgetState extends State<OrderDetailsWidget> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Crab, Roti, Chawal Salad aalu ki sookhi sabji unlimitedCrab',
+                item.itemName ?? '',
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 style: AppTextStyles.bodySmall.copyWith(
@@ -386,7 +478,7 @@ class _OrderDetailsWidgetState extends State<OrderDetailsWidget> {
                   color: AppColors.black,
                 ),
               ),
-              _keyValueRow('No of Guest', '2'),
+              _keyValueRow('No of Guest', item.numberOfGuest ?? '0'),
               InkWell(
                 onTap: () => _toggleItemDetails(index),
                 child: Text(
@@ -397,14 +489,29 @@ class _OrderDetailsWidgetState extends State<OrderDetailsWidget> {
                 ),
               ),
               if (_isItemExpanded(index)) ...[
-                _keyValueRow('Taxable Amount', '400/-'),
-                _keyValueRow('CGST', '400/-'),
-                _keyValueRow('SGST', '400/-'),
-                _keyValueRow('Net Amount', '400/-'),
-                _keyValueRow('Coopan Discount', '400/-'),
+                _keyValueRow(
+                  'Taxable Amount',
+                  '${item.priceBreakup?.taxableAmount ?? '0'}/-',
+                ),
+                _keyValueRow(
+                  'CGST',
+                  '${item.priceBreakup?.cgstAmount ?? '0'}/-',
+                ),
+                _keyValueRow(
+                  'SGST',
+                  '${item.priceBreakup?.sgstAmount ?? '0'}/-',
+                ),
+                _keyValueRow(
+                  'Net Amount',
+                  '${item.priceBreakup?.netAmount ?? '0'}/-',
+                ),
+                _keyValueRow(
+                  'Coopan Discount',
+                  '${item.priceBreakup?.discountAmount ?? '0'}/-',
+                ),
                 _keyValueRow(
                   'Payable amount',
-                  '400/-',
+                  '${item.priceBreakup?.payableAmount ?? '0'}/-',
                   boldLabel: true,
                   boldValue: true,
                 ),
@@ -416,7 +523,28 @@ class _OrderDetailsWidgetState extends State<OrderDetailsWidget> {
     );
   }
 
-  Widget _paymentSummary() {
+  int _getTotalGuests(List<OrderDetailsItemModel>? items) {
+    if (items == null || items.isEmpty) return 0;
+
+    int totalGuests = 0;
+    for (final item in items) {
+      final guests = int.tryParse((item.numberOfGuest ?? '').trim()) ?? 0;
+      totalGuests += guests;
+    }
+    return totalGuests;
+  }
+
+  Widget _paymentSummary(
+    OrderPriceBreakupModel? priceBreakup,
+    String status,
+    int totalGuests,
+  ) {
+    final String normalizedStatus = status.trim().toLowerCase();
+    final Color paymentStatusColor =
+        (normalizedStatus == 'unpaid' || normalizedStatus == 'pending')
+        ? AppColors.orange
+        : const Color(0xFF146514);
+
     return _sectionContainer(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -432,26 +560,25 @@ class _OrderDetailsWidgetState extends State<OrderDetailsWidget> {
           _keyValueRow('Transaction ID', 'CASH'),
           _keyValueRow(
             'Payment Status',
-            'Successful',
-            valueColor: const Color(0xFF146514),
+            status,
+            valueColor: paymentStatusColor,
           ),
           _keyValueRow('PAN Number', 'ABCDE1234F'),
           _keyValueRow('GST IN', '22ABCDE1234F1Z5'),
           const SizedBox(height: 8),
           CustomDottedDivider(color: AppColors.primaryColor.withOpacity(0.5)),
           const SizedBox(height: 8),
-          _keyValueRow('Total No. of Guest', '2'),
-          _keyValueRow('Total Taxable Amount', '400/-'),
-          _keyValueRow('Total CGST', '400/-'),
-          _keyValueRow('Total SGST', '400/-'),
-          _keyValueRow('Total Net Amount', '400/-'),
-          _keyValueRow('Total Discount', '400/-'),
+          _keyValueRow('Total number of guest', '$totalGuests'),
+          _keyValueRow('Total Taxable Amount', '${priceBreakup?.serviceTax}/-'),
+          _keyValueRow('Total CGST & SGSR', '${priceBreakup?.cgstSgstTax}/-'),
+          _keyValueRow('Total Net Amount', '${priceBreakup?.netAmount}'),
+          _keyValueRow('Total Discount', '${priceBreakup?.discountAmount}/-'),
           const SizedBox(height: 8),
           CustomDottedDivider(color: AppColors.primaryColor.withOpacity(0.5)),
           const SizedBox(height: 8),
           _keyValueRow(
             'Grand Total',
-            '500/-',
+            '${priceBreakup?.totalAmount}/-',
             boldLabel: true,
             boldValue: true,
           ),

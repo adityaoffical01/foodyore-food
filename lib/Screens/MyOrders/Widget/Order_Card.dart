@@ -98,10 +98,16 @@ Widget _info(
         Row(
           spacing: 8,
           children: [
-            Icon(
-              Iconsax.location_copy,
-              size: 12,
-              color: AppColors.primaryColor,
+            Container(
+              padding: EdgeInsets.all(12),
+              decoration: BoxDecoration(borderRadius: BorderRadius.circular(8.0),
+              color: AppColors.textHintColor.withOpacity(0.2)
+              ),
+              child: Icon(
+                Iconsax.location_copy,
+                size: 14,
+                color: AppColors.black,
+              ),
             ),
             Expanded(child: Text(location, style: AppTextStyles.bodyMedium)),
           ],
@@ -170,7 +176,7 @@ class _TotalAmount extends StatelessWidget {
         children: [
           Text('Total Amount', style: AppTextStyles.bodyMedium),
           Text(
-            '${AppContent().moneySymbol}${amount}',
+            '${AppContent().moneySymbol} $amount/-',
             style: AppTextStyles.bodyMedium.copyWith(
               fontWeight: FontWeight.bold,
               fontFamily: AppFonts.regular,

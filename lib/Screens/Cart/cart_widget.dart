@@ -13,6 +13,7 @@ import 'package:foodyore/utils/helpers/Custom/Custom_Loder.dart';
 import 'package:foodyore/utils/helpers/Custom/Custom_butoons.dart';
 import 'package:foodyore/utils/helpers/Custom/Custom_dottedline.dart';
 import 'package:foodyore/utils/helpers/Custom/Custom_screen_background.dart';
+import 'package:foodyore/utils/helpers/Custom/custom_popup.dart';
 import 'package:foodyore/utils/styles/Text_Styles.dart';
 import 'package:get/get.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
@@ -56,7 +57,7 @@ class _CartWidgetState extends State<CartWidget> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.backgroundColor,
-      appBar: CustomAppbar(title: 'Cart'),
+      appBar: CustomAppbar(title: 'CHECKOUT'),
       body: CustomBackground(
         child: RefreshIndicator(
           onRefresh: () async {
@@ -70,10 +71,12 @@ class _CartWidgetState extends State<CartWidget> {
                   child: CustomLoder(color: AppColors.primaryColor),
                 );
               } else if (_cartController.cartData.value.status ==
-                  Status.ERROR) {
+                      Status.ERROR ||
+                  (_cartController.cartData.value.data?.data?.isEmpty ??
+                      true)) {
                 return Padding(
                   padding: const EdgeInsets.symmetric(vertical: 20.0),
-                  child: Center(child: Text('Failed to load cart items')),
+                  child: Center(child: Text('Cart items not found')),
                 );
               } else {
                 final cartItems =
@@ -346,6 +349,12 @@ class _CartWidgetState extends State<CartWidget> {
 
   // for coopan section
   Widget _coopanSection() {
+    final double discountPercent =
+        (_cartController.cartData.value.data?.priceBreakup?.discountPercent ??
+                0)
+            .toDouble();
+    final bool hasDiscount = discountPercent > 0;
+
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 16.0),
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
@@ -359,8 +368,10 @@ class _CartWidgetState extends State<CartWidget> {
             color: AppColors.primaryColor,
           ),
           Text(
-            '10 % Discount is avalible for your order',
-            style: AppTextStyles.bodyMedium.copyWith(
+            hasDiscount
+                ? '${discountPercent.toStringAsFixed(discountPercent % 1 == 0 ? 0 : 1)} % Discount is avalible for your order'
+                : 'Discount is not currently applicable in your order',
+            style: AppTextStyles.bodySmall.copyWith(
               fontWeight: FontWeight.bold,
               fontFamily: AppFonts.regular,
               color: const Color.fromARGB(255, 15, 117, 15),
@@ -518,28 +529,26 @@ class _CartWidgetState extends State<CartWidget> {
 
   // Show dialog for removing single item
   void _showRemoveItemDialog(String cartItemId) {
-    print("object");
     if (_cartController.isLoading.value) return;
 
     if (Get.isDialogOpen ?? false) {
       Get.back();
     }
+    CustomPopup.show(
+      context: context,
+      title: 'Remove',
+      message: 'Do you want to remove this item from cart?',
+      cancelButtonText: 'Cancel',
+      submitButtonText: 'Remove',
+      submitButtonColor: AppColors.primaryColor,
 
-    Get.dialog(
-      AlertDialog(
-        title: Text('Remove Item'),
-        content: Text('Are you sure you want to remove this item?'),
-        actions: [
-          TextButton(onPressed: () => Get.back(), child: Text('Cancel')),
-          TextButton(
-            onPressed: () async {
-              await _cartController.removeCartItem(cartItemId: cartItemId);
-              Get.back();
-            },
-            child: Text('Remove', style: TextStyle(color: Colors.red)),
-          ),
-        ],
-      ),
+      onCancel: () {
+        Get.back();
+      },
+      onSubmit: () async {
+        await _cartController.removeCartItem(cartItemId: cartItemId);
+        Get.back();
+      },
     );
   }
 
@@ -547,21 +556,20 @@ class _CartWidgetState extends State<CartWidget> {
   void _showClearCartDialog() {
     if (Get.isDialogOpen ?? false) return;
     if (_cartController.isLoading.value) return;
-    Get.dialog(
-      AlertDialog(
-        title: Text('Clear Cart'),
-        content: Text('Are you sure you want to clear all items?'),
-        actions: [
-          TextButton(onPressed: () => Get.back(), child: Text('Cancel')),
-          TextButton(
-            onPressed: () async {
-              Get.back();
-              await _cartController.clearCart();
-            },
-            child: Text('Clear', style: TextStyle(color: Colors.red)),
-          ),
-        ],
-      ),
+    CustomPopup.show(
+      context: context,
+      title: 'Clear',
+      message: 'Are you sure you want to clear all items?',
+      cancelButtonText: 'Cancel',
+      submitButtonText: 'Clear',
+      submitButtonColor: AppColors.primaryColor,
+      onCancel: () {
+        Get.back();
+      },
+      onSubmit: () async {
+        Get.back();
+        await _cartController.clearCart();
+      },
     );
   }
 }

@@ -27,6 +27,19 @@ class CartItemCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final String normalizedItemType = (cartItem.itemType ?? '')
+        .trim()
+        .toLowerCase();
+    final bool isVeg = normalizedItemType == 'veg';
+    final bool isNonVeg =
+        normalizedItemType == 'nonveg' ||
+        normalizedItemType == 'non veg' ||
+        normalizedItemType == 'non-veg';
+    final bool showFoodTypeIndicator = isVeg || isNonVeg;
+    final Color foodTypeColor = isNonVeg
+        ? AppColors.red
+        : const Color.fromARGB(255, 1, 175, 1);
+
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16.0),
       padding: const EdgeInsets.all(16),
@@ -65,23 +78,22 @@ class CartItemCard extends StatelessWidget {
                       children: [
                         Row(
                           children: [
-                            Container(
-                              padding: const EdgeInsets.all(2),
-                              decoration: BoxDecoration(
-                                border: Border.all(
-                                  color: const Color.fromARGB(255, 1, 175, 1),
+                            if (showFoodTypeIndicator)
+                              Container(
+                                padding: const EdgeInsets.all(2),
+                                decoration: BoxDecoration(
+                                  border: Border.all(color: foodTypeColor),
+                                  borderRadius: BorderRadius.circular(4),
                                 ),
-                                borderRadius: BorderRadius.circular(4),
+                                child: Icon(
+                                  Icons.circle,
+                                  size: 8,
+                                  color: foodTypeColor,
+                                ),
                               ),
-                              child: const Icon(
-                                Icons.circle,
-                                size: 8,
-                                color: Color.fromARGB(255, 1, 175, 1),
-                              ),
-                            ),
-                            const SizedBox(width: 5),
+                            if (showFoodTypeIndicator) const SizedBox(width: 5),
                             Text(
-                              '#${cartItem.itemId ?? ''}',
+                              'CART - ${cartItem.itemId ?? ''}',
                               style: AppTextStyles.bodySmall.copyWith(
                                 fontWeight: FontWeight.w600,
                                 fontFamily: AppFonts.regular,

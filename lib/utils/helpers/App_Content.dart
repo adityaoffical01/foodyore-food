@@ -9,6 +9,7 @@ class AppContent {
   String moneySymbol = "₹";
   String termsAndConditionsUrl =
       "https://foodyore.com/CUSTOMER_TERM_CONDITIONS.aspx";
+  String becomeahost = 'https://foodyore.com/Become_Host';
 }
 
 class AppFonts {
@@ -78,7 +79,7 @@ void showCustomSnackBar({
   );
 }
 
-Future<void> openTerms({required String url}) async {
+Future<void> openUrls({required String url}) async {
   final Uri uri = Uri.parse(url);
 
   if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {

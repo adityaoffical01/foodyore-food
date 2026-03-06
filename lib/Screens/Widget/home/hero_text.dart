@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:foodyore/Screens/Widget/home/out_line_button.dart';
 import 'package:foodyore/Screens/Widget/home/primary_button.dart';
 import 'package:foodyore/utils/Colors/AppColors.dart';
+import 'package:foodyore/utils/helpers/App_Content.dart';
 import 'package:foodyore/utils/styles/Text_Styles.dart';
 
 class HeroText extends StatelessWidget {
@@ -42,7 +43,12 @@ class HeroText extends StatelessWidget {
             child: PrimaryButton('EXPLORE OUR EXPERIENCES'),
           ),
           const SizedBox(height: 8),
-          OutlineButton('BECOME OUR HOST'),
+          OutlineButton(
+            'BECOME OUR HOST',
+            onTap: () {
+              openUrls(url: AppContent().becomeahost);
+            },
+          ),
         ],
       ),
     );
