@@ -53,6 +53,19 @@ class AppUtils {
     return date;
   }
 
+  // Date Format : 16 Mar 2026
+  String convertDateToDDMMMYYYYFormat({String? dateString}) {
+    try {
+      if (dateString == null || dateString.trim().isEmpty) {
+        return '-- --- ----';
+      }
+      final DateTime dt = DateTime.parse(dateString).toLocal();
+      return DateFormat('dd MMM yyyy').format(dt);
+    } catch (e) {
+      return '-- --- ----';
+    }
+  }
+
   //Date Format : March 25,2020 - 10:30 PM
   String convertDateToMMMDDYYYYTimeFormat({String? dateString}) {
     DateTime dt = DateTime.parse(dateString!).toLocal();

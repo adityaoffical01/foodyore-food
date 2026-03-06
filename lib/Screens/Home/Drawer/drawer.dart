@@ -40,7 +40,7 @@ Drawer buildDrawer() {
         drawerItem(
           icon: Iconsax.shop_copy,
           title: 'My Order',
-          onTap: () => Get.to(const MyOrderWidget()),
+          onTap: () => Get.to(MyOrderWidget()),
         ),
 
         drawerItem(

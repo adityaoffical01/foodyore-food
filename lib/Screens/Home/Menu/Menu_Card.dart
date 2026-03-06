@@ -7,7 +7,6 @@ import 'package:foodyore/controller/cart_controller.dart';
 import 'package:foodyore/model/menu_model.dart';
 import 'package:foodyore/res/app_urls.dart';
 import 'package:foodyore/utils/Colors/AppColors.dart';
-import 'package:foodyore/utils/helpers/Custom/Custom_Loder.dart';
 import 'package:foodyore/utils/helpers/Custom/custom_popup.dart';
 import 'package:foodyore/utils/styles/Text_Styles.dart';
 import 'package:get/get.dart';

@@ -5,29 +5,27 @@ import 'package:foodyore/utils/Colors/AppColors.dart';
 import 'package:foodyore/utils/helpers/App_Content.dart';
 import 'package:foodyore/utils/helpers/Custom/Custom_dottedline.dart';
 import 'package:foodyore/utils/styles/Text_Styles.dart';
+import 'package:iconsax_flutter/iconsax_flutter.dart';
 
 class OrderCard extends StatelessWidget {
   final String orderId;
   final String status;
   final Color statusColor;
-  final String title;
+  final String hostName;
   final String location;
-  final String area;
-  final String user;
-  final String image;
-  final double totalAmount;
-
+  final String totalAmount;
+  final String orderDate;
+  final String orderTime;
   const OrderCard({
     super.key,
     required this.orderId,
     required this.status,
     required this.statusColor,
-    required this.title,
     required this.location,
-    required this.area,
-    required this.user,
-    required this.image,
     required this.totalAmount,
+    required this.hostName,
+    required this.orderDate,
+    required this.orderTime,
   });
 
   @override
@@ -40,12 +38,13 @@ class OrderCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(10),
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _Header(orderId, status, statusColor),
           const SizedBox(height: 4),
           Divider(color: AppColors.primaryColor.withOpacity(0.5)),
           const SizedBox(height: 4),
-          _ItemInfo(image, title, location, area, user),
+          _info(hostName, location, orderTime, orderDate),
           const SizedBox(height: 10),
           const CustomDottedDivider(),
           const SizedBox(height: 5),
@@ -56,6 +55,60 @@ class OrderCard extends StatelessWidget {
   }
 
   // for header
+}
+
+Widget _info(
+  String hostName,
+  String location,
+  String orderTime,
+  String orderDate,
+) {
+  return Padding(
+    padding: const EdgeInsets.symmetric(horizontal: 16),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: [
+        Text(
+          hostName,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: AppTextStyles.bodyLarge.copyWith(fontWeight: FontWeight.bold),
+        ),
+        Row(
+          spacing: 5,
+          children: [
+            Text(
+              'Reporting',
+              style: AppTextStyles.bodySmall.copyWith(color: AppColors.black),
+            ),
+            Icon(Icons.circle, size: 6, color: AppColors.black),
+            Text(
+              orderDate,
+              style: AppTextStyles.bodySmall.copyWith(color: AppColors.black),
+            ),
+            Icon(Icons.circle, size: 6, color: AppColors.black),
+            Text(
+              orderTime,
+              style: AppTextStyles.bodySmall.copyWith(color: AppColors.black),
+            ),
+          ],
+        ),
+
+        Row(
+          spacing: 8,
+          children: [
+            Icon(
+              Iconsax.location_copy,
+              size: 12,
+              color: AppColors.primaryColor,
+            ),
+            Expanded(child: Text(location, style: AppTextStyles.bodyMedium)),
+          ],
+        ),
+      ],
+    ),
+  );
 }
 
 class _Header extends StatelessWidget {
@@ -102,77 +155,9 @@ class _Header extends StatelessWidget {
   }
 }
 
-// for item info
-class _ItemInfo extends StatelessWidget {
-  final String image, title, location, area, user;
-
-  const _ItemInfo(this.image, this.title, this.location, this.area, this.user);
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: Image.asset(image, height: 60, width: 60, fit: BoxFit.cover),
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: AppTextStyles.bodyLarge.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                _InfoWrap(location, area, user),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// for info wrap
-class _InfoWrap extends StatelessWidget {
-  final String a, b, c;
-
-  const _InfoWrap(this.a, this.b, this.c);
-
-  @override
-  Widget build(BuildContext context) {
-    return Wrap(
-      spacing: 6,
-      runSpacing: 4,
-      crossAxisAlignment: WrapCrossAlignment.center,
-      children: [_text(a), _dot(), _text(b), _dot(), _text(c)],
-    );
-  }
-
-  Widget _text(String value) => Text(
-    value,
-    style: AppTextStyles.bodySmall.copyWith(
-      fontWeight: FontWeight.bold,
-      fontFamily: AppFonts.regular,
-      fontSize: 11.0,
-    ),
-  );
-
-  Widget _dot() => const Icon(Icons.circle, size: 6);
-}
-
 // for total amount
 class _TotalAmount extends StatelessWidget {
-  final double amount;
+  final String amount;
 
   const _TotalAmount(this.amount);
 
@@ -185,7 +170,7 @@ class _TotalAmount extends StatelessWidget {
         children: [
           Text('Total Amount', style: AppTextStyles.bodyMedium),
           Text(
-            '${AppContent().moneySymbol}${amount.toStringAsFixed(2)}',
+            '${AppContent().moneySymbol}${amount}',
             style: AppTextStyles.bodyMedium.copyWith(
               fontWeight: FontWeight.bold,
               fontFamily: AppFonts.regular,
