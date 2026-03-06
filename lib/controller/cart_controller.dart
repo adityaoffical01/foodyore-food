@@ -1,5 +1,3 @@
-
-
 import 'package:foodyore/data/response/api_response.dart';
 import 'package:foodyore/model/cart_model.dart';
 import 'package:foodyore/repository/cart_repo.dart';
@@ -20,11 +18,11 @@ class CartController extends GetxController {
   Future<void> fetchCartItems() async {
     if (isLoading.value) return;
 
-  isLoading.value = true;
-  cartData.value = ApiResponse.loading();
+    isLoading.value = true;
+    cartData.value = ApiResponse.loading();
     cartData.value = ApiResponse.loading();
     final deviceId = await DeviceService.getDeviceId();
-    print('aditya_device_id: ${deviceId}');
+
     try {
       final response = await _cartRepo.getCartItems(
         AppUrl.get_cart_urls(deviceId),
@@ -32,9 +30,9 @@ class CartController extends GetxController {
       cartData.value = ApiResponse.completed(response);
     } catch (e) {
       cartData.value = ApiResponse.error(e.toString());
-    }finally {
-  isLoading.value = false;
-}
+    } finally {
+      isLoading.value = false;
+    }
   }
 
   /// ADD TO CART
@@ -97,13 +95,12 @@ class CartController extends GetxController {
       isLoading.value = true;
       final deviceId = await DeviceService.getDeviceId();
 
-      Map<String, dynamic> body = {
-        "quantity": newQuantity.toString(),
-      };
+      Map<String, dynamic> body = {"quantity": newQuantity.toString()};
 
       // URL: https://foodyore.apsinghdev.in/api/cart/{cartItemId}?userIp=&userMachine=deviceId
-      final String url = '${AppUrl.put_cart_URL}$cartItemId?userIp=&userMachine=$deviceId';
-      
+      final String url =
+          '${AppUrl.put_cart_URL}$cartItemId?userIp=&userMachine=$deviceId';
+
       await _cartRepo.putData(url, body);
 
       isLoading.value = false;
@@ -142,22 +139,22 @@ class CartController extends GetxController {
     try {
       isLoading.value = true;
       final deviceId = await DeviceService.getDeviceId();
-  final cartItems = cartData.value.data?.data ?? [];
-    
-    if (cartItems.isEmpty) {
-      isLoading.value = false;
-      AppUtils.instance.snackBar("Info", "Cart is already empty", false);
-      return;
-    }
+      final cartItems = cartData.value.data?.data ?? [];
 
-    // Extract all cart IDs
-    final List<String> cartItemIds = cartItems
-        .map((item) => item.cartId.toString())
-        .where((id) => id.isNotEmpty)
-        .toList();
+      if (cartItems.isEmpty) {
+        isLoading.value = false;
+        AppUtils.instance.snackBar("Info", "Cart is already empty", false);
+        return;
+      }
 
-    // Join IDs with commas for URL
-    final String idsParam = cartItemIds.join(',');
+      // Extract all cart IDs
+      final List<String> cartItemIds = cartItems
+          .map((item) => item.cartId.toString())
+          .where((id) => id.isNotEmpty)
+          .toList();
+
+      // Join IDs with commas for URL
+      final String idsParam = cartItemIds.join(',');
       // URL: https://foodyore.apsinghdev.in/api/cart/clear?userIp=&userMachine=deviceId
       final String url = '${AppUrl.remove_cart_URL}$idsParam';
 

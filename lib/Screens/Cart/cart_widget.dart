@@ -1,7 +1,6 @@
-
-
 import 'package:flutter/material.dart';
 import 'package:foodyore/Auth/Controller/Auth_Controller.dart';
+import 'package:foodyore/Auth/Mobile_verification_widget.dart';
 import 'package:foodyore/Screens/Cart/Widget/Cart_Item_card.dart';
 import 'package:foodyore/controller/cart_controller.dart';
 import 'package:foodyore/controller/order_controller.dart';
@@ -15,12 +14,13 @@ import 'package:foodyore/utils/helpers/Custom/Custom_Loder.dart';
 import 'package:foodyore/utils/helpers/Custom/Custom_butoons.dart';
 import 'package:foodyore/utils/helpers/Custom/Custom_dottedline.dart';
 import 'package:foodyore/utils/helpers/Custom/Custom_screen_background.dart';
+import 'package:foodyore/utils/helpers/Custom/custom_popup.dart';
 import 'package:foodyore/utils/styles/Text_Styles.dart';
 import 'package:get/get.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 
 class CartWidget extends StatefulWidget {
-  const CartWidget({Key? key}) : super(key: key);
+  const CartWidget({super.key});
 
   @override
   State<CartWidget> createState() => _CartWidgetState();
@@ -58,7 +58,7 @@ class _CartWidgetState extends State<CartWidget> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.backgroundColor,
-      appBar: CustomAppbar(title: 'Cart'),
+      appBar: CustomAppbar(title: 'CHECKOUT'),
       body: CustomBackground(
         child: RefreshIndicator(
           onRefresh: () async {
@@ -72,21 +72,28 @@ class _CartWidgetState extends State<CartWidget> {
                   child: CustomLoder(color: AppColors.primaryColor),
                 );
               } else if (_cartController.cartData.value.status ==
-                  Status.ERROR) {
+                      Status.ERROR ||
+                  (_cartController.cartData.value.data?.data?.isEmpty ??
+                      true)) {
                 return Padding(
                   padding: const EdgeInsets.symmetric(vertical: 20.0),
-                  child: Center(child: Text('Failed to load cart items')),
+                  child: Center(child: Text('Cart items not found')),
                 );
               } else {
                 final cartItems =
                     _cartController.cartData.value.data?.data ?? [];
-                final selectedCount = isAllSelected ? cartItems.length : (isItemSelected ? 1 : 0);
-                
+                final selectedCount = isAllSelected
+                    ? cartItems.length
+                    : (isItemSelected ? 1 : 0);
+
                 return Column(
                   spacing: 2,
                   children: [
                     SizedBox(height: 10),
-                    _cartHeder(selectedCount: selectedCount, totalItems: cartItems.length),
+                    _cartHeder(
+                      selectedCount: selectedCount,
+                      totalItems: cartItems.length,
+                    ),
                     // for location discription
                     _LocationDiscription(),
                     // for cart items card
@@ -109,113 +116,166 @@ class _CartWidgetState extends State<CartWidget> {
           ),
         ),
       ),
-   bottomSheet: Obx(() {
-  final total = _cartController
-          .cartData.value.data?.priceBreakup?.totalAmount ??
-      0;
- 
-  // Check if cart is empty
-  final cartItems = _cartController.cartData.value.data?.data ?? [];
-  final bool isCartEmpty = cartItems.isEmpty;
+      bottomSheet: Obx(() {
+        final total =
+            _cartController.cartData.value.data?.priceBreakup?.totalAmount ?? 0;
 
-  return Container(
-    height: 80,
-    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-    decoration: BoxDecoration(color: AppColors.primaryColor),
-    child: Row(
-      children: [
-        Expanded(
-          child: Column(
+        // Check if cart is empty
+        final cartItems = _cartController.cartData.value.data?.data ?? [];
+        final bool isCartEmpty = cartItems.isEmpty;
+
+        return Container(
+          height: 80,
+          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          decoration: BoxDecoration(color: AppColors.primaryColor),
+          child: Row(
             children: [
-              Text(
-                'Total Amount',
-                style: AppTextStyles.bodyMedium.copyWith(
-                  color: AppColors.backgroundColor,
+              Expanded(
+                child: Column(
+                  children: [
+                    Text(
+                      'Total Amount',
+                      style: AppTextStyles.bodyMedium.copyWith(
+                        color: AppColors.backgroundColor,
+                      ),
+                    ),
+                    Text(
+                      '${AppContent().moneySymbol}$total/-',
+                      style: AppTextStyles.bodyMedium.copyWith(
+                        color: AppColors.white,
+                        fontFamily: AppFonts.regular,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              Text(
-                '${AppContent().moneySymbol}$total/-',
-                style: AppTextStyles.bodyMedium.copyWith(
-                  color: AppColors.white,
-                  fontFamily: AppFonts.regular,
-                  fontWeight: FontWeight.bold,
-                ),
+              Expanded(
+                child: _orderController.isPlacingOrder.value
+                    ? Center(
+                        child: CircularProgressIndicator(
+                          color: AppColors.white,
+                        ),
+                      )
+                    : CustomButton(
+                        horizontal: 0,
+                        raduis: 8.0,
+                        color: isCartEmpty
+                            ? AppColors.grey.withOpacity(0.5)
+                            : AppColors.white,
+                        tittleColor: isCartEmpty
+                            ? AppColors.white
+                            : AppColors.primaryColor,
+                        title: 'Pay Now',
+                        onPressed: isCartEmpty
+                            ? () {}
+                            : () {
+                                _handlePayNowPressed();
+                              },
+                      ),
               ),
             ],
           ),
-        ),
-         Expanded(
-          child: _orderController.isPlacingOrder.value
-              ? Center(
-                  child: CircularProgressIndicator(
-                    color: AppColors.white,
-                  ),
-                )
-              : CustomButton(
-                  horizontal: 0,
-                  raduis: 8.0,
-                  color: isCartEmpty 
-                      ? AppColors.grey.withOpacity(0.5) 
-                      : AppColors.white,
-                  tittleColor: isCartEmpty 
-                      ? AppColors.white 
-                      : AppColors.primaryColor,
-                  title: 'Pay Now',
-                  onPressed: isCartEmpty 
-                      ? (){} 
-                      : () {
-                          _showPaymentOptionsDialog();
-                        },
-                ),
-        ),
-      ],
-    ),
-  );
-}),);
+        );
+      }),
+    );
   }
-void _showPaymentOptionsDialog() {
+
+ void _handlePayNowPressed() {
+  final bool isLoggedIn = getAuthToken().trim().isNotEmpty;
+  if (!isLoggedIn) {
+    _showLoginRequiredDialog();
+    return;
+  }
+  _showPaymentOptionsDialog();
+}
+
+void _showLoginRequiredDialog() {
+  if (Get.isDialogOpen ?? false) return;
+  
   Get.dialog(
     AlertDialog(
-      title: Text('Select Payment Method'),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          ListTile(
-            leading: Icon(Icons.payment, color: AppColors.primaryColor),
-            title: Text('Online Payment'),
-            onTap: () {
-              Get.back();
-              _placeOrder(paymentType: 'Online');
-            },
-          ),
-          ListTile(
-            leading: Icon(Icons.money, color: AppColors.primaryColor),
-            title: Text('Cash on Delivery'),
-            onTap: () {
-              Get.back();
-              _placeOrder(paymentType: 'COD');
-            },
-          ),
-        ],
+      title: Text(
+        'Login Required',
+        style: AppTextStyles.bodyLarge.copyWith(
+          fontWeight: FontWeight.bold,
+          color: AppColors.textPrimary,
+        ),
+      ),
+      content: Text(
+        'If you want to checkout, please login first.',
+        style: AppTextStyles.bodyMedium.copyWith(
+          color: AppColors.textSecondary,
+        ),
       ),
       actions: [
         TextButton(
-          onPressed: () => Get.back(),
-          child: Text('Cancel'),
+          onPressed: () {
+            Get.back(); // Close dialog
+          },
+          child: Text(
+            'Cancel',
+            style: TextStyle(color: AppColors.grey),
+          ),
+        ),
+        ElevatedButton(
+          onPressed: () {
+            Get.back(); // Close dialog
+            // Navigate to login screen
+            Get.to(() => MobileVerificationWidget());
+          },
+          style: ElevatedButton.styleFrom(
+            backgroundColor: AppColors.primaryColor,
+            foregroundColor: AppColors.white,
+          ),
+          child: Text('Login'),
         ),
       ],
     ),
   );
 }
 
-// Place order method
-void _placeOrder({required String paymentType}) {
-  _orderController.placeOrder(
-    paymentType: paymentType,
-    promoCode: '', // Empty as per requirement
-    visitTime: '', // Optional
-  );
-}
+  void _showPaymentOptionsDialog() {
+    Get.dialog(
+      AlertDialog(
+        title: Text('Select Payment Method'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: Icon(Icons.payment, color: AppColors.primaryColor),
+              title: Text('Online Payment'),
+              onTap: () {
+                Get.back();
+                _placeOrder(paymentType: 'Online');
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.money, color: AppColors.primaryColor),
+              title: Text('Cash on Delivery'),
+              onTap: () {
+                Get.back();
+                _placeOrder(paymentType: 'COD');
+              },
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(onPressed: () => Get.back(), child: Text('Cancel')),
+        ],
+      ),
+    );
+  }
+
+  // Place order method
+  void _placeOrder({required String paymentType}) {
+    _orderController.placeOrder(
+      paymentType: paymentType,
+      promoCode: '', // Empty as per requirement
+      visitTime: '', // Optional
+    );
+  }
+
   Widget _cartHeder({required int selectedCount, required int totalItems}) {
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 16.0),
@@ -314,14 +374,14 @@ void _placeOrder({required String paymentType}) {
             });
           },
           onIncrease: () {
-              int currentQty = item.quantity ?? 1;
+            int currentQty = item.quantity ?? 1;
             _cartController.updateCartItemQuantity(
               cartItemId: item.cartId.toString(),
               newQuantity: currentQty + 1,
             );
           },
           onDecrease: () {
-             int currentQty = item.quantity ?? 1;
+            int currentQty = item.quantity ?? 1;
             if (currentQty > 1) {
               _cartController.updateCartItemQuantity(
                 cartItemId: item.cartId.toString(),
@@ -344,6 +404,12 @@ void _placeOrder({required String paymentType}) {
 
   // for coopan section
   Widget _coopanSection() {
+    final double discountPercent =
+        (_cartController.cartData.value.data?.priceBreakup?.discountPercent ??
+                0)
+            .toDouble();
+    final bool hasDiscount = discountPercent > 0;
+
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 16.0),
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
@@ -357,8 +423,10 @@ void _placeOrder({required String paymentType}) {
             color: AppColors.primaryColor,
           ),
           Text(
-            '10 % Discount is avalible for your order',
-            style: AppTextStyles.bodyMedium.copyWith(
+            hasDiscount
+                ? '${discountPercent.toStringAsFixed(discountPercent % 1 == 0 ? 0 : 1)} % Discount is avalible for your order'
+                : 'Discount is not currently applicable in your order',
+            style: AppTextStyles.bodySmall.copyWith(
               fontWeight: FontWeight.bold,
               fontFamily: AppFonts.regular,
               color: const Color.fromARGB(255, 15, 117, 15),
@@ -400,7 +468,7 @@ void _placeOrder({required String paymentType}) {
             ],
           ),
           Divider(color: AppColors.primaryColor.withOpacity(0.4)),
-          // for total item price
+
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -516,32 +584,26 @@ void _placeOrder({required String paymentType}) {
 
   // Show dialog for removing single item
   void _showRemoveItemDialog(String cartItemId) {
-    print("object");
-     if (_cartController.isLoading.value) return;
+    if (_cartController.isLoading.value) return;
 
-  if (Get.isDialogOpen ?? false) {
-    Get.back();
-  }
+    if (Get.isDialogOpen ?? false) {
+      Get.back();
+    }
+    CustomPopup.show(
+      context: context,
+      title: 'Remove',
+      message: 'Do you want to remove this item from cart?',
+      cancelButtonText: 'Cancel',
+      submitButtonText: 'Remove',
+      submitButtonColor: AppColors.primaryColor,
 
-    Get.dialog(
-      AlertDialog(
-        title: Text('Remove Item'),
-        content: Text('Are you sure you want to remove this item?'),
-        actions: [
-          TextButton(
-            onPressed: () => Get.back(),
-            child: Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () async {
-              await _cartController.removeCartItem(cartItemId: cartItemId);
-              Get.back();
-
-            },
-            child: Text('Remove', style: TextStyle(color: Colors.red)),
-          ),
-        ],
-      ),
+      onCancel: () {
+        Get.back();
+      },
+      onSubmit: () async {
+        await _cartController.removeCartItem(cartItemId: cartItemId);
+        Get.back();
+      },
     );
   }
 
@@ -549,24 +611,20 @@ void _placeOrder({required String paymentType}) {
   void _showClearCartDialog() {
     if (Get.isDialogOpen ?? false) return;
     if (_cartController.isLoading.value) return;
-    Get.dialog(
-      AlertDialog(
-        title: Text('Clear Cart'),
-        content: Text('Are you sure you want to clear all items?'),
-        actions: [
-          TextButton(
-            onPressed: () => Get.back(),
-            child: Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () async {
-              Get.back();
-              await _cartController.clearCart();
-            },
-            child: Text('Clear', style: TextStyle(color: Colors.red)),
-          ),
-        ],
-      ),
+    CustomPopup.show(
+      context: context,
+      title: 'Clear',
+      message: 'Are you sure you want to clear all items?',
+      cancelButtonText: 'Cancel',
+      submitButtonText: 'Clear',
+      submitButtonColor: AppColors.primaryColor,
+      onCancel: () {
+        Get.back();
+      },
+      onSubmit: () async {
+        Get.back();
+        await _cartController.clearCart();
+      },
     );
   }
 }

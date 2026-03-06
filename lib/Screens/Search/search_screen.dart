@@ -1,12 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:foodyore/Screens/Home/Widget/Categries/Widget/Category_Details_widget_by_search.dart';
+import 'package:foodyore/controller/search_controller.dart';
 import 'package:foodyore/utils/Colors/AppColors.dart';
+import 'package:foodyore/utils/helpers/Custom/Custom_Loder.dart';
 import 'package:foodyore/utils/helpers/Custom/Custom_screen_background.dart';
 import 'package:foodyore/utils/styles/Text_Styles.dart';
 import 'package:get/get.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 
 class SearchScreen extends StatelessWidget {
-  const SearchScreen({Key? key}) : super(key: key);
+  SearchScreen({super.key});
+  final SearchCityController _searchController = Get.put(
+    SearchCityController(),
+  );
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -32,7 +38,7 @@ class SearchScreen extends StatelessWidget {
                   cursorColor: AppColors.primaryColor,
                   decoration: InputDecoration(
                     hintText: "Search for your favorite city",
-                    prefixIcon: Icon(
+                    suffixIcon: Icon(
                       Iconsax.search_normal_1_copy,
                       color: AppColors.primaryColor,
                     ),
@@ -56,22 +62,12 @@ class SearchScreen extends StatelessWidget {
                       ),
                     ),
                   ),
-                ),
-              ),
-            ),
-            GestureDetector(
-              onTap: () {},
-              child: Container(
-                height: 40,
-                width: 40,
-                decoration: BoxDecoration(
-                  color: AppColors.primaryColor,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Icon(
-                  Iconsax.setting_4_copy,
-                  color: AppColors.backgroundColor,
-                  size: 20,
+                  onFieldSubmitted: (value) {
+                    _searchController.searchCity(value);
+                  },
+                  onChanged: (value) {
+                    _searchController.searchCity(value);
+                  },
                 ),
               ),
             ),
@@ -84,47 +80,57 @@ class SearchScreen extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: Column(
               children: [
-                Row(
-                  spacing: 5,
-                  children: [
-                    Icon(Iconsax.gps_copy, color: AppColors.red, size: 20),
-                    Text(
-                      "Detact My Location",
-                      style: AppTextStyles.bodySmall.copyWith(
-                        color: AppColors.red,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 14,
-                      ),
-                    ),
-                  ],
-                ),
                 SizedBox(height: 20),
-                GridView.count(
-                  crossAxisCount: 4,
-                  shrinkWrap: true,
-                  physics: NeverScrollableScrollPhysics(),
-                  mainAxisSpacing: 12,
-                  crossAxisSpacing: 12,
-                  children: List.generate(8, (index) {
-                    return Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Image.asset(
-                          'assets/images/lucknow_monuent.png',
-                          height: 55,
-                          width: 55,
-                          fit: BoxFit.cover,
-                        ),
-                        const SizedBox(height: 6),
-                        Text(
-                          'Lucknow',
-                          style: AppTextStyles.bodyMedium,
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
+                Obx(() {
+                  if (_searchController.isSearchLoading.value) {
+                    return Center(
+                      child: CustomLoder(color: AppColors.primaryColor),
                     );
-                  }),
-                ),
+                  } else if (_searchController.searchData.value.data == null ||
+                      _searchController.searchData.value.data!.data!.isEmpty) {
+                    return Text(
+                      'Curently no outlet avalible at your location ',
+                    );
+                  } else {
+                    final searh =
+                        _searchController.searchData.value.data!.data!;
+                    return GridView.count(
+                      crossAxisCount: 4,
+                      shrinkWrap: true,
+                      physics: NeverScrollableScrollPhysics(),
+                      mainAxisSpacing: 12,
+                      crossAxisSpacing: 12,
+                      children: List.generate(searh.length, (index) {
+                        return InkWell(
+                          onTap: () {
+                            Get.to(
+                              CategryDetailsWidgetBySearch(
+                                cityId: searh[index].cityId ?? '0',
+                              ),
+                            );
+                          },
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Image.asset(
+                                'assets/images/lucknow_monuent.png',
+                                height: 55,
+                                width: 55,
+                                fit: BoxFit.contain,
+                              ),
+                              // const SizedBox(height: 6),
+                              Text(
+                                searh[index].cityName ?? '',
+                                style: AppTextStyles.bodyMedium,
+                                textAlign: TextAlign.center,
+                              ),
+                            ],
+                          ),
+                        );
+                      }),
+                    );
+                  }
+                }),
               ],
             ),
           ),

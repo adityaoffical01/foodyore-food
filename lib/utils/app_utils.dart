@@ -1,7 +1,10 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:foodyore/utils/Colors/AppColors.dart';
 import 'package:get/get.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'package:intl/intl.dart';
 
@@ -51,6 +54,19 @@ class AppUtils {
     DateTime dt = DateTime.parse(dateString!).toLocal();
     String date = DateFormat("hh:mm a").format(dt).toString();
     return date;
+  }
+
+  // Date Format : 16 Mar 2026
+  String convertDateToDDMMMYYYYFormat({String? dateString}) {
+    try {
+      if (dateString == null || dateString.trim().isEmpty) {
+        return '-- --- ----';
+      }
+      final DateTime dt = DateTime.parse(dateString).toLocal();
+      return DateFormat('dd MMM yyyy').format(dt);
+    } catch (e) {
+      return '-- --- ----';
+    }
   }
 
   //Date Format : March 25,2020 - 10:30 PM
@@ -203,5 +219,33 @@ class AppUtils {
         );
       }
     }
+  }
+
+Future<void> openDirections({
+  required double lat,
+  required double long,
+}) async {
+  try {
+    // Pehle Google Maps app try karo
+    if (Platform.isAndroid) {
+      final Uri googleMapsAppUri = Uri.parse(
+        'google.navigation:q=$lat,$long&mode=d'
+      );
+      if (await canLaunchUrl(googleMapsAppUri)) {
+        await launchUrl(googleMapsAppUri, mode: LaunchMode.externalApplication);
+        return;
+      }
+    }
+    
+    // Agar app nahi hai to browser mein kholo
+    final Uri webUri = Uri.parse(
+      'https://www.google.com/maps/dir/?api=1&destination=$lat,$long&travelmode=driving'
+    );
+    await launchUrl(webUri, mode: LaunchMode.externalApplication);
+    
+  } catch (e) {
+    showCustomSnackBar('Unable to open maps');
+  }
+
   }
 }

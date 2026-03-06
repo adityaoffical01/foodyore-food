@@ -12,6 +12,7 @@ import 'package:foodyore/model/PDP_model.dart';
 import 'package:foodyore/model/amenities_list_model.dart';
 import 'package:foodyore/res/app_urls.dart';
 import 'package:foodyore/utils/Colors/AppColors.dart';
+import 'package:foodyore/utils/app_utils.dart';
 import 'package:foodyore/utils/helpers/Custom/Custom_Loder.dart';
 import 'package:foodyore/utils/helpers/Custom/Custom_butoons.dart';
 import 'package:foodyore/utils/helpers/Custom/Custom_screen_background.dart';
@@ -25,12 +26,12 @@ class ProductDetailsPageWidget extends StatefulWidget {
   final String descriptionId;
 
   const ProductDetailsPageWidget({
-    Key? key,
+    super.key,
     required this.hostId,
     required this.cattId,
     required this.subCatId,
     required this.descriptionId,
-  }) : super(key: key);
+  });
 
   @override
   State<ProductDetailsPageWidget> createState() =>
@@ -56,7 +57,8 @@ class _ProductDetailsPageWidgetState extends State<ProductDetailsPageWidget> {
       context: context,
       catId: widget.cattId,
       subCatId: widget.subCatId,
-      hostId: widget.hostId, userMachine: '',
+      hostId: widget.hostId,
+      userMachine: '',
     );
   }
 
@@ -247,25 +249,33 @@ class _ProductDetailsPageWidgetState extends State<ProductDetailsPageWidget> {
                 ),
               ),
             ),
-            _directionButton(),
+            _directionButton(
+              double.parse(data.latitude.toString()),
+              double.parse(data.longitude.toString()),
+            ),
           ],
         ),
       ],
     );
   }
 
-  Widget _directionButton() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 5),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(44),
-        border: Border.all(color: AppColors.primaryColor),
-      ),
-      child: Text(
-        'Direction',
-        style: AppTextStyles.bodySmall.copyWith(
-          color: AppColors.primaryColor,
-          fontWeight: FontWeight.bold,
+  Widget _directionButton(double lat, double long) {
+    return InkWell(
+      onTap: () async {
+        await AppUtils.instance.openDirections(lat: lat, long: long);
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 5),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(44),
+          border: Border.all(color: AppColors.primaryColor),
+        ),
+        child: Text(
+          'Direction',
+          style: AppTextStyles.bodySmall.copyWith(
+            color: AppColors.primaryColor,
+            fontWeight: FontWeight.bold,
+          ),
         ),
       ),
     );

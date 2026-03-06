@@ -40,7 +40,7 @@ Drawer buildDrawer() {
         drawerItem(
           icon: Iconsax.shop_copy,
           title: 'My Order',
-          onTap: () => Get.to(const MyOrderWidget()),
+          onTap: () => Get.to(MyOrderWidget()),
         ),
 
         drawerItem(
@@ -67,12 +67,11 @@ Drawer buildDrawer() {
           onTap: () => Get.to(PrivacyPolicyWidget()),
         ),
 
-        drawerItem(
-          icon: Iconsax.lock_1_copy,
-          title: 'Change Password',
-          onTap: () {},
-        ),
-
+        // drawerItem(
+        //   icon: Iconsax.lock_1_copy,
+        //   title: 'Change Password',
+        //   onTap: () {},
+        // ),
         drawerItem(
           icon: Iconsax.logout_copy,
           title: 'Logout',

@@ -14,7 +14,7 @@ import 'package:get/get.dart';
 
 class CategryDetailsWidget extends StatefulWidget {
   final CategoryItem? catItem;
-  const CategryDetailsWidget({Key? key, this.catItem}) : super(key: key);
+  const CategryDetailsWidget({super.key, this.catItem});
 
   @override
   State<CategryDetailsWidget> createState() => _CategryDetailsWidgetState();

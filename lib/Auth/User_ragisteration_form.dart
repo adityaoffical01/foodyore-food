@@ -3,6 +3,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:foodyore/Auth/Controller/Auth_Controller.dart';
+import 'package:foodyore/Auth/Mobile_verification_widget.dart';
 import 'package:foodyore/Screens/Home/Home_Screen.dart';
 import 'package:foodyore/model/profile_model.dart';
 import 'package:foodyore/services/app_config.dart';
@@ -40,6 +41,7 @@ class _UserRagisterationWidgetState extends State<UserRagisterationWidget> {
   final AuthController _authController = Get.put(AuthController());
   final _formKey = GlobalKey<FormState>();
   bool _isProfilePrefillLoading = false;
+  bool _isCheckingLogin = true;
 
   // Controllers
   final firstNameCtrl = TextEditingController();
@@ -63,12 +65,81 @@ class _UserRagisterationWidgetState extends State<UserRagisterationWidget> {
   @override
   void initState() {
     super.initState();
+    _checkLoginAndInit();
+  }
+
+  Future<void> _checkLoginAndInit() async {
+    setState(() => _isCheckingLogin = true);
+
+    // Check if this is profile edit and user is not logged in
+    if (widget.isFromProfile == true) {
+      final bool isLoggedIn = getAuthToken().trim().isNotEmpty;
+      
+      if (!isLoggedIn) {
+        setState(() => _isCheckingLogin = false);
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _showLoginRequiredDialog();
+        });
+        return;
+      }
+    }
+
+    // Normal initialization for logged in user or registration
+    setState(() => _isCheckingLogin = false);
+    
     if (widget.phoneNumber != null) {
       phoneCtrl.text = widget.phoneNumber!;
     }
     if (widget.isFromProfile == true) {
       _loadProfileForEdit();
     }
+  }
+
+  void _showLoginRequiredDialog() {
+    if (Get.isDialogOpen ?? false) return;
+    
+    Get.dialog(
+      AlertDialog(
+        title: Text(
+          'Login Required',
+          style: AppTextStyles.bodyLarge.copyWith(
+            fontWeight: FontWeight.bold,
+            color: AppColors.textPrimary,
+          ),
+        ),
+        content: Text(
+          'You need to login first to edit your profile.',
+          style: AppTextStyles.bodyMedium.copyWith(
+            color: AppColors.textSecondary,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Get.back(); // Close dialog
+              Get.back(); // Go back to previous screen
+            },
+            child: Text(
+              'Cancel',
+              style: TextStyle(color: AppColors.grey),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Get.back(); // Close dialog
+              Get.back(); // Go back to previous screen
+              // Navigate to login screen
+              Get.to(() => MobileVerificationWidget());
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primaryColor,
+              foregroundColor: AppColors.white,
+            ),
+            child: Text('Login'),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -107,6 +178,8 @@ class _UserRagisterationWidgetState extends State<UserRagisterationWidget> {
   }
 
   Future<void> _loadProfileForEdit() async {
+    setState(() => _isProfilePrefillLoading = true);
+    
     UserData? profile = _authController.userProfile.value;
 
     if (profile == null) {
@@ -123,6 +196,8 @@ class _UserRagisterationWidgetState extends State<UserRagisterationWidget> {
     if (profile != null && mounted) {
       _prefillForm(profile);
     }
+    
+    setState(() => _isProfilePrefillLoading = false);
   }
 
   void _prefillForm(UserData profile) {
@@ -168,6 +243,16 @@ class _UserRagisterationWidgetState extends State<UserRagisterationWidget> {
 
   @override
   Widget build(BuildContext context) {
+    // Show loader while checking login status
+    if (_isCheckingLogin) {
+      return Scaffold(
+        backgroundColor: AppColors.backgroundColor,
+        body: Center(
+          child: CustomLoder(color: AppColors.primaryColor),
+        ),
+      );
+    }
+
     return Scaffold(
       appBar: widget.isFromProfile == true
           ? AppBar(

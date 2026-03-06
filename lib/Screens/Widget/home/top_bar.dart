@@ -29,7 +29,7 @@ class TopBar extends StatelessWidget {
                   color: Colors.white,
                 ),
                 onPressed: () {
-                  Get.to(const SearchScreen());
+                  Get.to(SearchScreen());
                 },
               ),
               IconButton(

@@ -27,7 +27,11 @@ class ContactController extends GetxController {
       return;
     }
     if (mobileController.text.trim().length < 10) {
-      AppUtils.instance.snackBar("Error", "Please enter valid 10-digit mobile number", true);
+      AppUtils.instance.snackBar(
+        "Error",
+        "Please enter valid 10-digit mobile number",
+        true,
+      );
       return;
     }
     if (emailController.text.trim().isEmpty) {
@@ -61,10 +65,7 @@ class ContactController extends GetxController {
 
       print("Contact Form Data: $body");
 
-      final response = await _contactRepo.postData(
-        AppUrl.contact_us_URL,
-        body,
-      );
+      final response = await _contactRepo.postData(AppUrl.contact_us_URL, body);
 
       isLoading.value = false;
 
@@ -77,15 +78,10 @@ class ContactController extends GetxController {
 
       // Clear form after successful submission
       clearForm();
-      
     } catch (e) {
       isLoading.value = false;
       print("Error submitting contact form: $e");
-      AppUtils.instance.snackBar(
-        "Error",
-        e.toString(),
-        true,
-      );
+      AppUtils.instance.snackBar("Error", e.toString(), true);
     }
   }
 

@@ -1,3 +1,5 @@
+// ignore_for_file: constant_identifier_names, non_constant_identifier_names
+
 class AppUrl {
   static const String baseSlugUrl = 'https://foodyore.apsinghdev.in/api';
   static const String baseUrl = 'https://foodyore.apsinghdev.in';
@@ -40,9 +42,20 @@ class AppUrl {
   static const String remove_cart_URL = '$baseSlugUrl/cart/';
   static const String clear_cart_URL = '$baseSlugUrl/cart/';
   static const String create_order_URL = '$baseSlugUrl/orders';
+  static String get_order_history_URL(String customerId) =>
+      '$baseSlugUrl/orders?customerId=$customerId';
+  static String get_order_details_URL(String orderId) =>
+      '$baseSlugUrl/orders/$orderId';
 
   static String get_cart_urls(String userMachine) =>
       '$baseSlugUrl/cart?userMachine=$userMachine';
+
+  static String search_city_URL(String city) => Uri.parse(
+    '$baseSlugUrl/locations/search',
+  ).replace(queryParameters: {'city': city}).toString();
+
+  static String city_subcategories_URL(String cityId) =>
+      '$baseSlugUrl/locations/cities/$cityId/subcategories';
 
   static String checkAvailabilityUrl({
     required String locationId,
@@ -50,15 +63,15 @@ class AppUrl {
     required String fromTime,
     required String toTime,
   }) {
-    return Uri.parse(
-      '$baseSlugUrl/hosts/check-availability',
-    ).replace(
-      queryParameters: {
-        'locationId': locationId,
-        'checkDate': checkDate,
-        'fromTime': fromTime,
-        'toTime': toTime,
-      },
-    ).toString();
+    return Uri.parse('$baseSlugUrl/hosts/check-availability')
+        .replace(
+          queryParameters: {
+            'locationId': locationId,
+            'checkDate': checkDate,
+            'fromTime': fromTime,
+            'toTime': toTime,
+          },
+        )
+        .toString();
   }
 }

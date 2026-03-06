@@ -1,4 +1,4 @@
-// ignore_for_file: deprecated_member_use
+// ignore_for_file: use_build_context_synchronously, deprecated_member_use
 
 import 'dart:async';
 
@@ -150,10 +150,9 @@ class _MenuItemWidgetState extends State<MenuItemWidget> {
           color: AppColors.primaryColor,
           top: 10,
           bottom: 12,
-
-          title: 'GO TO CART',
+          title: 'GO FOR CHECKOUT',
           onPressed: () {
-            Get.to(CartWidget());
+            Get.off(CartWidget());
           },
         ),
       ),
@@ -283,58 +282,60 @@ class _MenuItemWidgetState extends State<MenuItemWidget> {
         Positioned(
           right: 0,
           top: 0,
-          child: isInCart != true
-              ? InkWell(
-                  onTap: () async {
-                    final confirmed = await _showAddToCartConfirmation(context);
-                    if (!confirmed) return;
+          child:
+              // isInCart != true
+              //     ?
+              InkWell(
+                onTap: () async {
+                  final confirmed = await _showAddToCartConfirmation(context);
+                  if (!confirmed) return;
 
-                    await _cartController
-                        .itemAddToCart(
-                          itemId: item.amenitieId.toString(),
-                          hostId: item.hostId.toString(),
-                          locationId: item.locationId.toString(),
-                          categoryId: item.categoryId ?? '',
-                          subCategoryId: item.subCategoryId ?? '',
-                          price: item.price.toString(),
-                          itemDetails: item.amenitieType.toString(),
-                          itemType: item.amenitieType.toString(),
-                          quantity: item.unit.toString(),
-                        )
-                        .then((isAdd) async {
-                          if (isAdd == true) {
-                            final deviceId = await DeviceService.getDeviceId();
-                            await _categoryController.fetchAmenitiesData(
-                              context: context,
-                              catId: widget.categoryId,
-                              subCatId: widget.subCategoryId,
-                              hostId: widget.hostId,
-                              locationId: widget.locationId,
-                              userMachine: deviceId,
-                            );
-                          }
-                        });
-                  },
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 2,
-                    ),
-                    decoration: BoxDecoration(
-                      color: AppColors.primaryColor,
-                      border: Border.all(
-                        color: AppColors.primaryColor,
-                        width: 1.2,
-                      ),
-                      borderRadius: BorderRadius.circular(8.0),
-                    ),
-                    child: Text(
-                      'Add',
-                      style: AppTextStyles.buttonText.copyWith(fontSize: 12),
-                    ),
+                  await _cartController
+                      .itemAddToCart(
+                        itemId: item.amenitieId.toString(),
+                        hostId: item.hostId.toString(),
+                        locationId: item.locationId.toString(),
+                        categoryId: item.categoryId ?? '',
+                        subCategoryId: item.subCategoryId ?? '',
+                        price: item.price.toString(),
+                        itemDetails: item.amenitieType.toString(),
+                        itemType: item.amenitieType.toString(),
+                        quantity: item.unit.toString(),
+                      )
+                      .then((isAdd) async {
+                        if (isAdd == true) {
+                          final deviceId = await DeviceService.getDeviceId();
+                          await _categoryController.fetchAmenitiesData(
+                            context: context,
+                            catId: widget.categoryId,
+                            subCatId: widget.subCategoryId,
+                            hostId: widget.hostId,
+                            locationId: widget.locationId,
+                            userMachine: deviceId,
+                          );
+                        }
+                      });
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 2,
                   ),
-                )
-              : QtySelector(onIncrease: () {}, onDecrease: () {}),
+                  decoration: BoxDecoration(
+                    color: AppColors.primaryColor,
+                    border: Border.all(
+                      color: AppColors.primaryColor,
+                      width: 1.2,
+                    ),
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                  child: Text(
+                    'Add',
+                    style: AppTextStyles.buttonText.copyWith(fontSize: 12),
+                  ),
+                ),
+              ),
+          // : QtySelector(onIncrease: () {}, onDecrease: () {}),
         ),
         Positioned(
           bottom: 6,

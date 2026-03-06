@@ -172,7 +172,7 @@ class AuthController extends GetxController {
       return false;
     }
     try {
-         print("user profile erro1");
+      print("user profile erro1");
       isProfileLoading.value = true;
       profileResponse.value = ApiResponse.loading();
 
