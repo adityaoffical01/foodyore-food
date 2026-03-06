@@ -278,7 +278,6 @@ class OrderDetailsItemPriceBreakupModel {
   }
 }
 
-
 int? _toInt(dynamic value) {
   if (value == null) return null;
   if (value is int) return value;
